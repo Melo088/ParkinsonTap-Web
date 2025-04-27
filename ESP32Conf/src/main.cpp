@@ -127,7 +127,7 @@ void updateAngles() {
   accYangle = (atan2(AcX, AcZ) * RAD_TO_DEG);
   accZangle = (atan2(AcX, AcY) * RAD_TO_DEG);
 
-  // Obtener los valores de velocidad angular (gyroscopio)
+  // Obtener los valores de velocidad angular
   gyroXrate = g.gyro.x;
   gyroYrate = g.gyro.y;
   gyroZrate = g.gyro.z;
@@ -161,52 +161,59 @@ void httpPOST() {
   Serial.println("-------------------------------------");
   
   // Iniciar la construcción del JSON manualmente
-  String json = "{\"testId\":2,\"readings\":[";
+  String json = "{\"testId\":102,\"readings\":[";
   
-  // Tomar lecturas
-  for (int i = 0; i < 250; i++) {
-    // Actualizar los ángulos
-    updateAngles();
+  unsigned long startTime = millis();   // Guardar el tiempo de inicio
+  unsigned long lastSampleTime = startTime;  // Guardar el tiempo de la última muestra
+  
+  for (int i = 0; i < 250; ) {  // incremento i manual
+    unsigned long currentTime = millis();
     
-    // Leer los datos del sensor
-    sensors_event_t a, g, temp;
-    mpu.getEvent(&a, &g, &temp);
-    
-    // Añadir esta lectura al JSON como un objeto
-    json += "{";
-    json += "\"time\":" + String(i * 40) + ",";
-    json += "\"ax\":" + String(a.acceleration.x) + ",";
-    json += "\"ay\":" + String(a.acceleration.y) + ",";
-    json += "\"az\":" + String(a.acceleration.z) + ",";
-    json += "\"y\":" + String(compAngleZ) + ",";  // yaw
-    json += "\"p\":" + String(compAngleY) + ",";  // pitch
-    json += "\"r\":" + String(compAngleX);  // roll
-    json += "}";
-    
-    // Añadir coma excepto para el último elemento
-    if (i < 249) {
-      json += ",";
+    if (currentTime - lastSampleTime >= 40) {  // Si han pasado 40 ms
+      // Actualizar los ángulos
+      updateAngles();
+      
+      // Leer los datos del sensor
+      sensors_event_t a, g, temp;
+      mpu.getEvent(&a, &g, &temp);
+      
+      // Añadir esta lectura al JSON como un objeto
+      json += "{";
+      json += "\"time\":" + String(currentTime - startTime) + ",";  // Tiempo real transcurrido
+      json += "\"ax\":" + String(a.acceleration.x) + ",";
+      json += "\"ay\":" + String(a.acceleration.y) + ",";
+      json += "\"az\":" + String(a.acceleration.z) + ",";
+      json += "\"y\":" + String(compAngleZ) + ",";
+      json += "\"p\":" + String(compAngleY) + ",";
+      json += "\"r\":" + String(compAngleX);
+      json += "}";
+      
+      // Añadir coma excepto para el último elemento
+      if (i < 249) {
+        json += ",";
+      }
+      
+      // Mostrar los valores en el monitor serial cada 10 lecturas
+      if (showImuData && i % 10 == 0) {
+        Serial.print("Lectura ");
+        Serial.print(i);
+        Serial.print(": ax=");
+        Serial.print(a.acceleration.x);
+        Serial.print(" ay=");
+        Serial.print(a.acceleration.y);
+        Serial.print(" az=");
+        Serial.print(a.acceleration.z);
+        Serial.print(" Yaw=");
+        Serial.print(compAngleZ);
+        Serial.print(" Pitch=");
+        Serial.print(compAngleY);
+        Serial.print(" Roll=");
+        Serial.println(compAngleX);
+      }
+      
+      lastSampleTime = currentTime;
+      i++;  
     }
-    
-    // Mostrar los valores en el monitor serial solo durante la prueba
-    if (showImuData && i % 10 == 0) {
-      Serial.print("Lectura ");
-      Serial.print(i);
-      Serial.print(": ax=");
-      Serial.print(a.acceleration.x);
-      Serial.print(" ay=");
-      Serial.print(a.acceleration.y);
-      Serial.print(" az=");
-      Serial.print(a.acceleration.z);
-      Serial.print(" Yaw=");
-      Serial.print(compAngleZ);
-      Serial.print(" Pitch=");
-      Serial.print(compAngleY);
-      Serial.print(" Roll=");
-      Serial.println(compAngleX);
-    }
-    
-    delay(40);
   }
   
   // Cerrar el array de lecturas y el objeto principal
@@ -277,7 +284,7 @@ void setup() {
   // Espera para que el monitor serial se conecte
   delay(3000);
   
-  Serial.println("\n\n\n");  // Añade líneas en blanco para separar del ruido inicial
+  Serial.println("\n\n\n");
   
   // Inicializamos el MPU6050
   initMPU();
