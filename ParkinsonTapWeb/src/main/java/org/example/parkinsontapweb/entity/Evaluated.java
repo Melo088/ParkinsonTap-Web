@@ -1,6 +1,8 @@
 package org.example.parkinsontapweb.entity;
 
 import jakarta.persistence.*;
+
+import java.sql.Date;
 import java.time.LocalDate;
 
 @Entity
@@ -33,5 +35,69 @@ public class Evaluated {
 
     public Integer getId() {
         return id;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public void setGenre(Genre genre) {
+        this.genre = genre;
+    }
+
+    public EvaluatedType getEvaluatedType() {
+        return evaluatedType;
+    }
+
+    public void setEvaluatedType(EvaluatedType evaluatedType) {
+        this.evaluatedType = evaluatedType;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
+    }
+
+    public Float getHeight() {
+        return height;
+    }
+
+    public void setHeight(Float height) {
+        this.height = height;
+    }
+
+    public LocalDate getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(LocalDate birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 }
