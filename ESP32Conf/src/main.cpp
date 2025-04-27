@@ -192,7 +192,13 @@ void httpPOST() {
     if (showImuData && i % 10 == 0) {
       Serial.print("Lectura ");
       Serial.print(i);
-      Serial.print(": Yaw=");
+      Serial.print(": ax=");
+      Serial.print(a.acceleration.x);
+      Serial.print(" ay=");
+      Serial.print(a.acceleration.y);
+      Serial.print(" az=");
+      Serial.print(a.acceleration.z);
+      Serial.print(" Yaw=");
       Serial.print(compAngleZ);
       Serial.print(" Pitch=");
       Serial.print(compAngleY);
