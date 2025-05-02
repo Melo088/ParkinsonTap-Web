@@ -22,8 +22,8 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
-const char* topic = "icesi/telematica";
-String url = "http://192.168.1.2:8080/api/esp32/batch-readings";
+const char* topic = "esp32/data";
+String url = "http://192.168.1.7:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;
@@ -41,22 +41,10 @@ bool showImuData = false;
 void displayMenu() {
   Serial.println("\n===== SISTEMA DE CAPTURA DE DATOS IMU =====");
   Serial.println("Comandos disponibles:");
-  Serial.println("w - Conectar a WiFi");
   Serial.println("g - Realizar GET HTTP");
   Serial.println("p - Realizar POST HTTP con datos del MPU6050");
   Serial.println("m - Mostrar este menú nuevamente");
   Serial.println("=========================================");
-}
-
-void callback(char* topic, byte* payload, unsigned int length) {
-  // Imprime el mensaje recibido
-  Serial.print("Mensaje recibido en el topic ");
-  Serial.print(topic);
-  Serial.print(": ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
 }
 
 void keepAlive() {
@@ -268,12 +256,43 @@ void initWiFi() {
     Serial.println("\n¡Conectado correctamente!");
     Serial.print("Dirección IP: ");
     Serial.println(WiFi.localIP());
+    
+    // Conectar al broker MQTT después de establecer la conexión WiFi
+    Serial.println("Conectando al broker MQTT...");
+    if (mqttClient.connect(clientName)) {
+      Serial.println("Conectado al servidor MQTT!");
+      mqttClient.subscribe(topic);
+    } else {
+      Serial.print("Error al conectar al MQTT: ");
+      Serial.println(mqttClient.state());
+    }
   } else {
     Serial.println("\nNo se pudo conectar al WiFi. Intente nuevamente.");
   }
   
   // Mostrar el menú de nuevo después de completar la operación
   displayMenu();
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  String message = "";
+  for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+  Serial.print("Mensaje recibido en el topic: ");
+  Serial.print(topic);
+  Serial.print(" - Mensaje: ");
+  Serial.println(message);
+
+  if(message == "start"){
+    initWiFi();
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("Realizando HTTP POST con datos del MPU6050...");
+      httpPOST();
+    } else {
+      Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
+    }
+  }
 }
 
 void setup() {
@@ -293,8 +312,13 @@ void setup() {
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(callback);
   
-  // Mostrar el menú de comandos
+  // Mostrar el menú de comandos pero actualizado (sin la opción 'w')
   displayMenu();
+  
+  // Pequeña pausa y luego iniciar la conexión WiFi automáticamente
+  Serial.println("Iniciando conexión WiFi automáticamente en 3 segundos...");
+  delay(3000);
+  initWiFi();
 }
 
 void loop() {
@@ -308,24 +332,22 @@ void loop() {
   if (Serial.available() > 0) {
     String data = Serial.readStringUntil('\n');
     
-    if (data == "w") {
-      initWiFi();
-    } else if (data == "g") {
+    if (data == "g") {
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("Realizando HTTP GET...");
         httpGET();
         displayMenu();  // Mostrar menú después de completar la operación
       } else {
-        Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
-        displayMenu();
+        Serial.println("Error: No hay conexión WiFi.");
+        initWiFi();  // Intentar reconectar automáticamente
       }
     } else if (data == "p") {
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("Realizando HTTP POST con datos del MPU6050...");
         httpPOST();
       } else {
-        Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
-        displayMenu();
+        Serial.println("Error: No hay conexión WiFi.");
+        initWiFi();  // Intentar reconectar automáticamente
       }
     } else if (data == "m") {
       displayMenu();
@@ -338,4 +360,3 @@ void loop() {
   
   delay(10);
 }
-
