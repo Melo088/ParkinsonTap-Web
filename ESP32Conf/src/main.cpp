@@ -7,8 +7,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "LABREDES";
+const char* password = "F0rmul4-1";
 
 // MQTT params
 const char* mqttServer = "broker.emqx.io";
@@ -23,7 +23,7 @@ PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
 const char* topic = "esp32/data";
-String url = "http://192.168.1.7:8080/api/esp32/batch-readings";
+String url = "http://192.168.130.55:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;
@@ -149,7 +149,7 @@ void httpPOST() {
   Serial.println("-------------------------------------");
   
   // Iniciar la construcción del JSON manualmente
-  String json = "{\"testId\":102,\"readings\":[";
+  String json = "{\"testId\":152,\"readings\":[";
   
   unsigned long startTime = millis();   // Guardar el tiempo de inicio
   unsigned long lastSampleTime = startTime;  // Guardar el tiempo de la última muestra
