@@ -7,8 +7,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-const char* ssid = "LABREDES";
-const char* password = "F0rmul4-1";
+const char* ssid = "casita";
+const char* password = "1004214610";
 
 // MQTT params
 const char* mqttServer = "broker.emqx.io";
@@ -23,7 +23,7 @@ PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
 const char* topic = "esp32/data";
-String url = "http://192.168.130.55:8080/api/esp32/batch-readings";
+String url = "http://192.168.1.12:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;
@@ -140,6 +140,8 @@ void updateAngles() {
   compAngleZ = ap * (compAngleZ + gyroZAngle) + (1 - ap) * accZangle;
 }
 
+int currentTestId = 0;
+
 void httpPOST() {
   // Activar la visualización de datos del IMU durante la prueba
   showImuData = true;
@@ -149,7 +151,7 @@ void httpPOST() {
   Serial.println("-------------------------------------");
   
   // Iniciar la construcción del JSON manualmente
-  String json = "{\"testId\":152,\"readings\":[";
+  String json = "{\"testId\":" + String(currentTestId) + ",\"readings\":[";
   
   unsigned long startTime = millis();   // Guardar el tiempo de inicio
   unsigned long lastSampleTime = startTime;  // Guardar el tiempo de la última muestra
@@ -274,6 +276,8 @@ void initWiFi() {
   displayMenu();
 }
 
+
+
 void callback(char* topic, byte* payload, unsigned int length) {
   String message = "";
   for (int i = 0; i < length; i++) {
@@ -284,6 +288,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print(" - Mensaje: ");
   Serial.println(message);
 
+  // Verificar si el mensaje es un simple "start" (para compatibilidad)
   if(message == "start"){
     initWiFi();
     if (WiFi.status() == WL_CONNECTED) {
@@ -292,6 +297,37 @@ void callback(char* topic, byte* payload, unsigned int length) {
     } else {
       Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
     }
+    return;
+  }
+  
+  // Intentar parsear el mensaje como JSON
+  JSONVar jsonMessage;
+  jsonMessage = JSON.parse(message);
+  
+  if (JSON.typeof(jsonMessage) == "undefined") {
+    Serial.println("El parsing del mensaje JSON falló!");
+    return;
+  }
+  
+  // Verificar si el mensaje tiene el comando "start" y un testId
+  if (jsonMessage.hasOwnProperty("command") && String((const char*)jsonMessage["command"]) == "start") {
+    if (jsonMessage.hasOwnProperty("testId")) {
+      currentTestId = (int)jsonMessage["testId"];
+      Serial.print("ID del test recibido: ");
+      Serial.println(currentTestId);
+      
+      initWiFi();
+      if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("Realizando HTTP POST con datos del MPU6050...");
+        httpPOST(); // Esta función ahora usará currentTestId
+      } else {
+        Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
+      }
+    } else {
+      Serial.println("Comando 'start' recibido pero falta el ID del test");
+    }
+  } else {
+    Serial.println("Comando desconocido en el mensaje JSON");
   }
 }
 
