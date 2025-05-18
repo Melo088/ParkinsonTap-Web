@@ -1,0 +1,67 @@
+package org.example.parkinsontapweb.Security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AuthFilter extends OncePerRequestFilter {
+
+
+    private UserDetailsService userDetailsService;
+
+
+    private JwtProvider jwtProvider;
+
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String token = getTokenFromRequest(request);
+        if (StringUtils.hasText(token)&& jwtProvider.validateToken(token)) {
+            String email = jwtProvider.getEmailFromToken(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            List<String> roles = userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+            if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_DOCTOR")) {
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            }
+
+        }
+        filterChain.doFilter(request, response);
+    }
+
+    //Extraer el token
+    private String getTokenFromRequest(HttpServletRequest request) {
+        final String authorization = request.getHeader("Authorization");
+        if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
+            return authorization.substring(7);
+
+        }
+        return null;
+    }
+
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+    public void setJwtProvider(JwtProvider jwtProvider) {
+        this.jwtProvider = jwtProvider;
+    }
+
+}
