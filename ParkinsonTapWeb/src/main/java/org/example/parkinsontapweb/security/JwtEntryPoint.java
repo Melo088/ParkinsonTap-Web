@@ -1,4 +1,4 @@
-package org.example.parkinsontapweb.Security;
+package org.example.parkinsontapweb.security;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

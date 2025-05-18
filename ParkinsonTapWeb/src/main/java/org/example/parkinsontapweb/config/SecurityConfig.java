@@ -1,10 +1,9 @@
 package org.example.parkinsontapweb.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.parkinsontapweb.Security.AuthFilter;
-import org.example.parkinsontapweb.Security.JwtEntryPoint;
-import org.example.parkinsontapweb.Security.JwtProvider;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.parkinsontapweb.security.AuthFilter;
+import org.example.parkinsontapweb.security.JwtEntryPoint;
+import org.example.parkinsontapweb.security.JwtProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,7 +45,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/evaluated/**").hasAuthority("ROLE_DOCTOR")
+                        .requestMatchers("/api/evaluated/**").hasAuthority("DOCTOR")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter(), UsernamePasswordAuthenticationFilter.class);

@@ -39,6 +39,19 @@ public class Evaluated {
 
     //Falta relación de doctores
 
+
+    @ManyToOne
+    @JoinColumn(name="doctorId")
+    private Doctor doctor;
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
+
     public List<Test> getTests() {
         return tests;
     }

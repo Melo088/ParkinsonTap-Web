@@ -1,8 +1,11 @@
-package org.example.parkinsontapweb.Security;
+package org.example.parkinsontapweb.security;
+
+import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@Component
 public class PasswordEncoder {
 
     public static String hashPassword(String password) {

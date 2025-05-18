@@ -1,4 +1,4 @@
-package org.example.parkinsontapweb.Security;
+package org.example.parkinsontapweb.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
