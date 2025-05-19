@@ -49,5 +49,12 @@ public class DoctorController {
     }
 
     //Method to delete doctor
-
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteDoctor(@PathVariable Integer id) {
+        if (!doctorRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found");
+        }
+        doctorRepository.deleteById(id);
+        return ResponseEntity.ok("Doctor was deleted");
+    }
 }
