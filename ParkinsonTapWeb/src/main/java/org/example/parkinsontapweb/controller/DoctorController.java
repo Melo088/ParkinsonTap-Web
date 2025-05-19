@@ -11,30 +11,34 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.Collections;
-
 @RestController
 @RequestMapping("/api/doctor")
 @CrossOrigin(origins = "*")
 public class DoctorController {
 
-    @Autowired
-    private DoctorRepository doctorRepository;
+    private final DoctorRepository doctorRepository;
+    private final EvaluatedRepository evaluatedRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Autowired
-    private EvaluatedRepository evaluatedRepository;
+    public DoctorController(
+            DoctorRepository doctorRepository,
+            EvaluatedRepository evaluatedRepository,
+            PasswordEncoder passwordEncoder,
+            RoleRepository roleRepository
+    ) {
+        this.doctorRepository = doctorRepository;
+        this.evaluatedRepository = evaluatedRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     //Method to register doctors
     @PostMapping("/register")
     public ResponseEntity<String> registerDoctor(@RequestBody Doctor doctor) {
-        if(doctorRepository.findByEmail(doctor.getEmail()) != null){
+        if(doctorRepository.existsByEmail(doctor.getEmail())){
             return new ResponseEntity<>("Doctor already exists, try again", HttpStatus.BAD_REQUEST);
         }
         doctor.setPassword(passwordEncoder.hashPassword(doctor.getPassword()));
@@ -44,4 +48,15 @@ public class DoctorController {
 
         return new ResponseEntity<>("Doctor was registered successfully", HttpStatus.OK);
     }
+
+
+    /*@DeleteMapping("/delete")
+    public ResponseEntity<String> deleteDoctor(@PathVariable Long id) {
+        if (!doctorRepository.existsById(id)) {
+            return new ResponseEntity<>("Doctor not found", HttpStatus.NOT_FOUND);
+        }
+        doctorRepository.deleteById(id);
+        return new ResponseEntity<>("Doctor deleted successfully", HttpStatus.OK);
+    }*/
+
 }

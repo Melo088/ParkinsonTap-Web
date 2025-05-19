@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.parkinsontapweb.security.AuthFilter;
 import org.example.parkinsontapweb.security.JwtEntryPoint;
 import org.example.parkinsontapweb.security.JwtProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,20 +19,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+
     private final JwtEntryPoint jwtEntryPoint;
     private JwtProvider jwtProvider;
-    private final UserDetailsService userDetailsService;
+
+
+    @Autowired
+    public SecurityConfig(JwtEntryPoint jwtEntryPoint) {
+        this.jwtEntryPoint = jwtEntryPoint;
+    }
 
     @Bean
     public AuthFilter authFilter() {
-        AuthFilter filter = new AuthFilter();
-        filter.setJwtProvider(jwtProvider);
-        filter.setUserDetailsService(userDetailsService);
-        return filter;
+        return new AuthFilter();
     }
 
     @Bean
@@ -45,6 +48,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtEntryPoint))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("api/doctor/**").permitAll()
                         .requestMatchers("/api/evaluated/**").hasAuthority("DOCTOR")
                         .anyRequest().authenticated()
                 )

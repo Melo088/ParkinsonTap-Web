@@ -52,11 +52,6 @@ public class AuthFilter extends OncePerRequestFilter {
         return null;
     }
 
-    public void setUserDetailsService(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-    public void setJwtProvider(JwtProvider jwtProvider) {
-        this.jwtProvider = jwtProvider;
-    }
+
 
 }
