@@ -14,6 +14,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,6 +35,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
     public AuthFilter authFilter() {
         return new AuthFilter();
     }
@@ -48,7 +55,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e.authenticationEntryPoint(jwtEntryPoint))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/doctor/**").permitAll()
+                        .requestMatchers("api/doctor/**").permitAll() //agregar autoridad
+                        .requestMatchers("api/user/**").permitAll()
                         .requestMatchers("/api/evaluated/**").hasAuthority("DOCTOR")
                         .anyRequest().authenticated()
                 )
