@@ -1,5 +1,6 @@
 package org.example.parkinsontapweb.controller;
 
+import org.example.parkinsontapweb.dto.LoginDTO;
 import org.example.parkinsontapweb.entity.Doctor;
 import org.example.parkinsontapweb.entity.Role;
 import org.example.parkinsontapweb.repository.DoctorRepository;
@@ -45,18 +46,12 @@ public class DoctorController {
         Role role = roleRepository.findByRoleName("DOCTOR");
         doctor.setRole(role);
         doctorRepository.save(doctor);
-
         return new ResponseEntity<>("Doctor was registered successfully", HttpStatus.OK);
     }
 
+    /*@PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO) {
 
-    /*@DeleteMapping("/delete")
-    public ResponseEntity<String> deleteDoctor(@PathVariable Long id) {
-        if (!doctorRepository.existsById(id)) {
-            return new ResponseEntity<>("Doctor not found", HttpStatus.NOT_FOUND);
-        }
-        doctorRepository.deleteById(id);
-        return new ResponseEntity<>("Doctor deleted successfully", HttpStatus.OK);
     }*/
 
 }
