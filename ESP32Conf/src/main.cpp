@@ -23,7 +23,7 @@ PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
 const char* topic = "esp32/data";
-String url = "http://192.168.1.12:8080/api/esp32/batch-readings";
+String url = "http://192.168.1.3:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;

@@ -1,6 +1,8 @@
 package org.example.parkinsontapweb.controller;
 
+import org.example.parkinsontapweb.dto.EvaluatedDTO;
 import org.example.parkinsontapweb.entity.Evaluated;
+import org.example.parkinsontapweb.mapper.EvaluatedMapper;
 import org.example.parkinsontapweb.repository.EvaluatedRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +28,11 @@ public class EvaluatedController {
 
     }
 
-
-
     @GetMapping("/data")
-    public List<Evaluated> listAll() {
-        return evaluatedRepository.findAll();
+    public List<EvaluatedDTO> listAll() {
+
+        List<Evaluated> evaluatedList = evaluatedRepository.findAll();
+        return EvaluatedMapper.toDTOList(evaluatedList);
     }
 
     @GetMapping("/search")

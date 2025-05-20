@@ -57,7 +57,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("api/doctor/**").permitAll() //agregar autoridad
                         .requestMatchers("api/user/**").permitAll()
-                        .requestMatchers("/api/evaluated/**").hasAuthority("DOCTOR")
+                        .requestMatchers("/api/evaluated/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/api/esp32/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(authFilter(), UsernamePasswordAuthenticationFilter.class);
