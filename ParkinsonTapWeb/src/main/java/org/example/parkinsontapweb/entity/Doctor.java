@@ -7,22 +7,8 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("DOCTOR")
 public class Doctor extends User{
-
-    //Persist --- Merge
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Evaluated> evaluatedList;
-
     private String specialty;
     private String medicalCenter;
-
-    public List<Evaluated> getEvaluatedList() {
-        return evaluatedList;
-    }
-
-    public void setEvaluatedList(List<Evaluated> evaluatedList) {
-        this.evaluatedList = evaluatedList;
-    }
-
 
     public String getSpecialty() {
         return specialty;
@@ -39,6 +25,5 @@ public class Doctor extends User{
     public void setMedicalCenter(String medicalCenter) {
         this.medicalCenter = medicalCenter;
     }
-
 
 }
