@@ -40,4 +40,16 @@ public class EvaluatedController {
         return evaluatedRepository.findByNameContainingIgnoreCase(name);
     }
 
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEvaluated(@PathVariable Integer id) {
+        if (!evaluatedRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        evaluatedRepository.deleteById(id);
+        return ResponseEntity.ok("Evaluado eliminado con éxito");
+    }
+
+
 }
