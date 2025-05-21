@@ -2,6 +2,7 @@ let client;
 
 export function connectMQTT() {
   client = new Paho.MQTT.Client("broker.emqx.io", 8083, "ESP32MeloPublisher");
+  
   client.connect({
     onSuccess: () => {
       console.log("Conectado al broker MQTT");
