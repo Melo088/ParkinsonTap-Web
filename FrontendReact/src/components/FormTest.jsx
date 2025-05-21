@@ -1,91 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { getEvaluatedData, saveTest } from '../services/testService';
-import { TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import React from 'react';
+import { 
+  TextField, 
+  Button, 
+  MenuItem, 
+  Select, 
+  InputLabel, 
+  FormControl, 
+  Paper,
+  Typography,
+  Alert,
+  Box,
+  CircularProgress
+} from '@mui/material';
 import { AssignmentAdd } from "@mui/icons-material";
 
-
-const FormTest = (props) => {
-  const [evaluados, setEvaluados] = useState([]);
-  const [selectedEvaluado, setSelectedEvaluado] = useState('');
-  const [testName, setTestName] = useState('');
-  const [side, setSide] = useState('');
-  const [message, setMessage] = useState('');
-  const [formTouched, setFormTouched] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [responseMessage, setResponseMessage] = useState('');
-
-
-  useEffect(() => {
-    // Llamar al servicio que obtiene los evaluados
-    const fetchData = async () => {
-      try {
-        const data = await getEvaluatedData();
-        setEvaluados(data);
-      } catch (error) {
-        console.error("Error fetching evaluated data:", error);
-        setResponseMessage("Error al cargar los evaluados");
-      }
-    };
-    
-    fetchData();
-  }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setFormTouched(true);
-
-    // Verificar si algún campo está vacío
-    if (testName.trim() === '' || side === '' || message.trim() === '' || selectedEvaluado === '') {
-      setResponseMessage('Por favor complete todos los campos obligatorios');
-      return;
-    }
-
-    // Preparar los datos para la API
-    const testData = {
-      name: testName,
-      description: message,
-      evalAxis: side === 'izquierdo', // true para izq, false para derecha
-      dateTime: new Date().toISOString().replace('Z', ''), // formato 2023-08-15T14:30:15.000
-      evaluatedId: parseInt(selectedEvaluado), 
-    };
-
-    console.log("Sending test data:", testData);
-
-    //solicitud a la API
-    setLoading(true);
-    setResponseMessage('');
-
-    try {
-      const result = await saveTest(testData);
-      setLoading(false);
-
-      if (result.error) {
-        setResponseMessage(`Error: ${result.error}`);
-      } else {
-        setResponseMessage('Test guardado con éxito');
-        
-        if (result.testId) {
-          if (props.onTestSaved) {
-            props.onTestSaved(result.testId); // Llamar a la función de callback con el testId
-          }
-        }
-        
-        // resetear el formulario
-        setTestName('');
-        setSide('');
-        setMessage('');
-        setSelectedEvaluado('');
-        setFormTouched(false);
-      }
-    } catch (error) {
-      setLoading(false);
-      setResponseMessage(`Error inesperado: ${error.message}`);
-    }
-  };
-
+const FormTest = ({ 
+  testName, 
+  setTestName, 
+  side, 
+  setSide, 
+  message, 
+  setMessage, 
+  selectedEvaluado, 
+  setSelectedEvaluado, 
+  evaluados, 
+  formTouched,
+  handleSubmit,
+  loading,
+  responseMessage
+}) => {
+  
   return (
-    <div>
-      <h2>Formulario de Test</h2>
+    <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
+      <Typography variant="h5" component="h2" gutterBottom>
+        Formulario de Test
+      </Typography>
+      
       <form onSubmit={handleSubmit}>
         {/* Nombre del Test */}
         <TextField
@@ -112,9 +62,9 @@ const FormTest = (props) => {
             <MenuItem value="derecho">Derecho</MenuItem>
           </Select>
           {formTouched && side === '' && (
-            <div style={{ color: '#d32f2f', fontSize: '0.75rem', marginTop: '3px', marginLeft: '14px' }}>
+            <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
               Este campo es obligatorio
-            </div>
+            </Typography>
           )}
         </FormControl>
 
@@ -148,9 +98,9 @@ const FormTest = (props) => {
             ))}
           </Select>
           {formTouched && selectedEvaluado === '' && (
-            <div style={{ color: '#d32f2f', fontSize: '0.75rem', marginTop: '3px', marginLeft: '14px' }}>
+            <Typography color="error" variant="caption" sx={{ ml: 2, mt: 0.5 }}>
               Este campo es obligatorio
-            </div>
+            </Typography>
           )}
         </FormControl>
 
@@ -159,7 +109,7 @@ const FormTest = (props) => {
           type="submit"
           variant="contained"
           color="primary"
-          startIcon={<AssignmentAdd />}
+          startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <AssignmentAdd />}
           fullWidth
           disabled={loading}
           sx={{ mt: 2 }}
@@ -170,17 +120,13 @@ const FormTest = (props) => {
 
       {/* Mensaje de respuesta */}
       {responseMessage && (
-        <div style={{ 
-          marginTop: '20px', 
-          padding: '10px',
-          borderRadius: '4px',
-          backgroundColor: responseMessage.includes('Error') ? '#ffebee' : '#e8f5e9',
-          color: responseMessage.includes('Error') ? '#c62828' : '#2e7d32' 
-        }}>
-          {responseMessage}
-        </div>
+        <Box sx={{ mt: 2 }}>
+          <Alert severity={responseMessage.includes('Error') ? 'error' : 'success'}>
+            {responseMessage}
+          </Alert>
+        </Box>
       )}
-    </div>
+    </Paper>
   );
 };
 

@@ -1,24 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { connectMQTT, sendStartMessage } from '../services/dataAcquisitionService';
+import React from 'react';
+import { 
+  Typography, 
+  Button, 
+  Box, 
+  Paper, 
+  Chip 
+} from '@mui/material';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
-function DataAcquisitionButton(props) {
-  const { testId } = props;
-  
-  useEffect(() => {
-    connectMQTT();
-  }, []);
-  
-  const startTest = () => {
-    sendStartMessage(testId);
-  };
-
+function DataAcquisitionButton({ testId, onStartTest }) {
   return (
-    <div>
-      <h2>Toma de datos</h2>
-      <p>Puede iniciar la toma de datos <b>pulsando el botón</b></p>
-      {testId && <p>ID del test: {testId}</p>}
-      <button onClick={startTest}>Iniciar Prueba</button>
-    </div>
+    <Paper elevation={3} sx={{ p: 3, mt: 3, textAlign: 'center' }}>
+      <Typography variant="h5" gutterBottom>
+        Toma de datos
+      </Typography>
+      
+      <Typography variant="body1" paragraph>
+        Puede iniciar la toma de datos <strong>pulsando el botón</strong>
+      </Typography>
+      
+      {testId && (
+        <Box sx={{ mb: 3 }}>
+          <Chip 
+            label={`ID del test: ${testId}`} 
+            color="primary" 
+            variant="outlined"
+          />
+        </Box>
+      )}
+      
+      <Button 
+        variant="contained" 
+        color="primary" 
+        size="large"
+        startIcon={<PlayArrowIcon />}
+        onClick={onStartTest}
+      >
+        Iniciar Prueba
+      </Button>
+    </Paper>
   );
 }
 

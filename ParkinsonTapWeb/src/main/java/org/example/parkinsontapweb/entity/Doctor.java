@@ -7,15 +7,16 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("DOCTOR")
 public class Doctor extends User{
-    private String specialty;
+    private String speciality;
     private String medicalCenter;
 
-    public String getSpecialty() {
-        return specialty;
+
+    public String getSpeciality() {
+        return speciality;
     }
 
-    public void setSpecialty(String specialty) {
-        this.specialty = specialty;
+    public void setSpeciality(String speciality) {
+        this.speciality = speciality;
     }
 
     public String getMedicalCenter() {
@@ -25,5 +26,4 @@ public class Doctor extends User{
     public void setMedicalCenter(String medicalCenter) {
         this.medicalCenter = medicalCenter;
     }
-
 }
