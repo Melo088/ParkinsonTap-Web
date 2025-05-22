@@ -11,6 +11,7 @@ import {
 import { Add as AddIcon } from '@mui/icons-material';
 import { evaluatedService } from '../services/evaluatedService';
 import EvaluatedCard from '../components/EvaluatedCard';
+import EvaluatedForm from '../components/EvaluatedForm';
 import Grid from '@mui/material/Grid';
 
 console.log('EvaluatedScreen loaded');
@@ -132,7 +133,7 @@ const EvaluatedScreen = () => {
               No hay controles registrados
             </Typography>
           </Box>
-          ) : (
+        ) : (
           <Grid container spacing={2}>
             {controls.map((evaluated) => (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={evaluated.id}>
@@ -146,8 +147,12 @@ const EvaluatedScreen = () => {
         )}
       </Box>
 
-    
-    
+      {/* Formulario Modal */}
+      <EvaluatedForm
+        open={openForm}
+        onClose={() => setOpenForm(false)}
+        onSuccess={handleAddEvaluated}
+      />
 
       {/* Botón flotante */}
       <Fab

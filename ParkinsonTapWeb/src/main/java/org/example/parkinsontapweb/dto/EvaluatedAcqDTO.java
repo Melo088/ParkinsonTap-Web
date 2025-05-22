@@ -1,10 +1,8 @@
 package org.example.parkinsontapweb.dto;
 
 import java.time.LocalDate;
-import java.util.List;
 
-public class EvaluatedDTO {
-    private Integer id;
+public class EvaluatedAcqDTO {
     private String name;
     private Float weight;
     private Float height;
@@ -13,17 +11,6 @@ public class EvaluatedDTO {
     private Boolean status;
     private String genreName;
     private String evaluatedTypeName;
-    // private Integer doctorId;
-
-    private List<TestDTO> tests;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -88,21 +75,6 @@ public class EvaluatedDTO {
     public void setEvaluatedTypeName(String evaluatedTypeName) {
         this.evaluatedTypeName = evaluatedTypeName;
     }
-
-    //public Integer getDoctorId() {
-    //    return doctorId;
-    //}
-
-    //public void setDoctorId(Integer doctorId) {
-    //    this.doctorId = doctorId;
-    //}
-
-    public List<TestDTO> getTests() {
-        return tests;
-    }
-
-    public void setTests(List<TestDTO> tests) {
-        this.tests = tests;
-    }
 }
+
 

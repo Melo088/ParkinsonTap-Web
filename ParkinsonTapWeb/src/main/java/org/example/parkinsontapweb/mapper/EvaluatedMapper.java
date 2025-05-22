@@ -25,8 +25,8 @@ public class EvaluatedMapper {
         if (evaluated.getEvaluatedType() != null)
             dto.setEvaluatedTypeName(evaluated.getEvaluatedType().getTypeName());
 
-        if (evaluated.getDoctor() != null)
-            dto.setDoctorId(evaluated.getDoctor().getId());
+        //if (evaluated.getDoctor() != null)
+        //    dto.setDoctorId(evaluated.getDoctor().getId());
 
         if (evaluated.getTests() != null) {
             List<TestDTO> testDTOs = evaluated.getTests().stream().map(test -> {
