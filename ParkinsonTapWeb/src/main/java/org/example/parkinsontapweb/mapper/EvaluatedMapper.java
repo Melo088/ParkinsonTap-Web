@@ -36,8 +36,6 @@ public class EvaluatedMapper {
                 testDTO.setDateTime(test.getDateTime().toString());
                 testDTO.setEvalAxis(test.getEvalAxis());
                 testDTO.setDescription(test.getDescription());
-                if (test.getDoctor() != null)
-                    testDTO.setDoctorId(test.getDoctor().getId());
                 return testDTO;
             }).collect(Collectors.toList());
 

@@ -26,7 +26,7 @@ function HomeScreen() {
           startIcon={<AssignmentIcon />}
           onClick={() => navigate('/form')}
         >
-          Crear Nuevo Test
+          
         </Button>
       </Box>
     </Paper>

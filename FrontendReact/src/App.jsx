@@ -9,6 +9,7 @@ import DataAcquisitionScreen from './screens/DataAcquisitionScreen';
 import LoginScreen from './screens/LoginScreen';
 import AdminScreen from './screens/AdminScreen';
 import UnauthorizedScreen from './screens/UnauthorizedScreen';
+import EvaluatedScreen from './screens/EvaluatedScreen';
 
 // Components
 import Layout from './components/Layout';
@@ -16,7 +17,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 // Services
 import { authService } from './services/authService';
-import EvaluatedScreen from './screens/EvaluatedScreen';
 
 const theme = createTheme({
   palette: {
@@ -42,9 +42,9 @@ function App() {
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/unauthorized" element={<UnauthorizedScreen />} />
 
-          {/* Ruta protegida padre */}
+          {/* Rutas protegidas */}
           <Route path="/" element={<ProtectedRoute />}>
-            {/* Layout se carga siempre para estas rutas protegidas */}
+            {/* Rutas con layout */}
             <Route element={<Layout />}>
               <Route index element={
                 <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
@@ -56,19 +56,23 @@ function App() {
                   <HomeScreen />
                 </Container>
               } />
-              <Route path="form" element={
-                <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-                  <FormTestScreen />
-                </Container>
-              } />
-              <Route path="acquisition/:testId" element={
-                <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-                  <DataAcquisitionScreen />
-                </Container>
-              } />
+
+              {/* Rutas protegidas solo para DOCTOR */}
+              <Route element={<ProtectedRoute requiredRole="DOCTOR" />}>
+                <Route path="form" element={
+                  <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+                    <FormTestScreen />
+                  </Container>
+                } />
+                <Route path="acquisition/:testId" element={
+                  <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+                    <DataAcquisitionScreen />
+                  </Container>
+                } />
+              </Route>
             </Route>
 
-            {/* Rutas protegidas con rol */}
+            {/* Rutas protegidas específicas por rol (fuera del layout principal) */}
             <Route path="admin" element={<ProtectedRoute requiredRole="ADMIN" />}>
               <Route index element={<AdminScreen />} />
             </Route>

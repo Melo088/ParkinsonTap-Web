@@ -19,22 +19,25 @@ export function sendStartMessage(testId) {
     console.error("Cliente MQTT no conectado");
     return;
   }
-  
-  // Si tenemos un testId, enviamos un mensaje JSON, sino enviamos "start" como antes
+
+  let messageData;
+  let message;
+
   if (testId) {
-    const messageData = JSON.stringify({
+    messageData = JSON.stringify({
       command: "start",
       testId: parseInt(testId)
     });
-    
-    const message = new Paho.MQTT.Message(messageData);
-    message.destinationName = "esp32/data";
-    client.send(message);
-    console.log("Mensaje enviado:", messageData);
+    message = new Paho.MQTT.Message(messageData);
   } else {
-    const message = new Paho.MQTT.Message("start");
-    message.destinationName = "esp32/data";
-    client.send(message);
-    console.log("Mensaje enviado: start");
+    messageData = "start";
+    message = new Paho.MQTT.Message(messageData);
   }
+
+  message.destinationName = "esp32/data";
+  client.send(message);
+
+  console.log("Mensaje enviado:", messageData);
+  alert("Mensaje enviado correctamente");
+  window.location.href = "/doctor";
 }

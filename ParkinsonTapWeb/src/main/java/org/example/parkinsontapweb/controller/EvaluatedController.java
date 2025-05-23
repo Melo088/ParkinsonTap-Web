@@ -2,23 +2,19 @@ package org.example.parkinsontapweb.controller;
 
 import org.example.parkinsontapweb.dto.EvaluatedAcqDTO;
 import org.example.parkinsontapweb.dto.EvaluatedDTO;
-import org.example.parkinsontapweb.entity.Doctor;
-import org.example.parkinsontapweb.entity.Evaluated;
-import org.example.parkinsontapweb.entity.EvaluatedType;
-import org.example.parkinsontapweb.entity.Genre;
+import org.example.parkinsontapweb.entity.*;
 import org.example.parkinsontapweb.mapper.EvaluatedMapper;
-import org.example.parkinsontapweb.repository.EvaluatedRepository;
-import org.example.parkinsontapweb.repository.GenreRepository;
+import org.example.parkinsontapweb.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.example.parkinsontapweb.repository.EvaluatedTypeRepository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RequestMapping("/api/evaluated")
@@ -32,6 +28,10 @@ public class EvaluatedController {
 
     @Autowired
     private GenreRepository genreRepository;
+    @Autowired
+    private ReadingRepository readingRepository;
+    @Autowired
+    private TestRepository testRepository;
 
 
     @PostMapping("/register")
@@ -114,6 +114,7 @@ public class EvaluatedController {
     }
 
     @GetMapping("/data")
+    @PreAuthorize("hasAuthority('DOCTOR')")
     public List<EvaluatedDTO> listAll() {
 
         List<Evaluated> evaluatedList = evaluatedRepository.findAll();
@@ -124,5 +125,28 @@ public class EvaluatedController {
     public List<Evaluated> searchByName(@RequestParam String name) {
         return evaluatedRepository.findByNameContainingIgnoreCase(name);
     }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    public ResponseEntity<Map<String, String>> deleteEvaluated(@PathVariable Integer id) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "id is required"));
+        }
+
+        Optional<Evaluated> optionalEvaluated = evaluatedRepository.findById(id);
+
+        if (optionalEvaluated.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Evaluated not found"));
+        }
+
+        evaluatedRepository.delete(optionalEvaluated.get());
+
+        return ResponseEntity.ok(Map.of("message", "Evaluated successfully deleted"));
+    }
+
+
+
 
 }

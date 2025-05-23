@@ -17,7 +17,6 @@ import {
   ExpandLess as ExpandLessIcon,
   Male as MaleIcon,
   Female as FemaleIcon,
-  QuestionMark as OtherIcon,
   Medication as MedicationIcon,
 } from "@mui/icons-material";
 
@@ -54,29 +53,26 @@ const EvaluatedCard = ({ evaluated, onDelete }) => {
 
   // Función para obtener el icono del género
   const getGenderIcon = () => {
-    if (!evaluated.genre) return <OtherIcon sx={{ fontSize: 16 }} />;
-    
-    const genreName = evaluated.genre.name?.toLowerCase();
-    if (genreName === 'masculino' ) {
+    if (!evaluated.genreName) return null;
+    const genreName = evaluated.genreName.toLowerCase();
+    if (genreName === 'masculino') {
       return <MaleIcon sx={{ fontSize: 16, color: '#1976d2' }} />;
-    } else if (genreName === 'femenino' ) {
+    } else if (genreName === 'femenino') {
       return <FemaleIcon sx={{ fontSize: 16, color: '#d81b60' }} />;
-    } else {
-      return <OtherIcon sx={{ fontSize: 16, color: '#757575' }} />;
-    }
+    } 
   };
 
   // Función para obtener el color del chip según el tipo
   const getTypeChipColor = () => {
-    if (!evaluated.evaluatedType) return "default";
-    const typeName = evaluated.evaluatedType.name?.toLowerCase();
+    if (!evaluated.evaluatedTypeName) return "default";
+    const typeName = evaluated.evaluatedTypeName.toLowerCase();
     return typeName === 'pacientes' ? "error" : "success";
   };
 
   // Función para determinar si es paciente
   const isPatient = () => {
-    if (!evaluated.evaluatedType) return false;
-    return evaluated.evaluatedType.name?.toLowerCase() === 'pacientes';
+    if (!evaluated.evaluatedTypeName) return false;
+    return evaluated.evaluatedTypeName.toLowerCase() === 'pacientes';
   };
 
   return (
@@ -92,7 +88,7 @@ const EvaluatedCard = ({ evaluated, onDelete }) => {
           <Box display="flex" alignItems="center" gap={1}>
             {getGenderIcon()}
             <Chip 
-              label={evaluated.evaluatedType?.name || "Sin tipo"} 
+              label={evaluated.evaluatedTypeName || "Sin tipo"} 
               size="small"
               color={getTypeChipColor()}
               variant="outlined"
@@ -105,7 +101,7 @@ const EvaluatedCard = ({ evaluated, onDelete }) => {
             <strong>Edad:</strong> {calculateAge(evaluated.birthDate)} años
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            <strong>Género:</strong> {evaluated.genre?.name || "No especificado"}
+            <strong>Género:</strong> {evaluated.genreName || "No especificado"}
           </Typography>
         </Box>
 

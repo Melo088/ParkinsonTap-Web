@@ -3,9 +3,11 @@ package org.example.parkinsontapweb.controller;
 import org.example.parkinsontapweb.dto.DoctorDTO;
 import org.example.parkinsontapweb.entity.Doctor;
 import org.example.parkinsontapweb.entity.Role;
+import org.example.parkinsontapweb.entity.Test;
 import org.example.parkinsontapweb.repository.DoctorRepository;
 import org.example.parkinsontapweb.repository.EvaluatedRepository;
 import org.example.parkinsontapweb.repository.RoleRepository;
+import org.example.parkinsontapweb.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,18 +27,20 @@ public class DoctorController {
     private final EvaluatedRepository evaluatedRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final TestRepository testRepository;
 
     @Autowired
     public DoctorController(
             DoctorRepository doctorRepository,
             EvaluatedRepository evaluatedRepository,
             PasswordEncoder passwordEncoder,
-            RoleRepository roleRepository
-    ) {
+            RoleRepository roleRepository,
+            TestRepository testRepository) {
         this.doctorRepository = doctorRepository;
         this.evaluatedRepository = evaluatedRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
+        this.testRepository = testRepository;
     }
 
     // Endpoint para obtener todos los doctores - Solo ADMIN
@@ -74,8 +78,23 @@ public class DoctorController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("message", "Doctor not found"));
         }
+
+        // Buscar tests relacionados con ese doctor
+        List<Test> myTests = testRepository.findByDoctorId(id);
+
+        if(!myTests.isEmpty()){
+            // Desvincular doctor de cada test
+            for (Test test : myTests) {
+                test.setDoctor(null);
+            }
+            // Guardar los tests actualizados
+            testRepository.saveAll(myTests);
+        }
+        // borrar doctor
         doctorRepository.deleteById(id);
+
         return ResponseEntity.ok(Map.of("message", "Doctor was deleted"));
     }
+
 
 }

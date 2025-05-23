@@ -11,26 +11,44 @@ const getAuthHeaders = () => {
 export const authService = {
   // Login
   login: async (email, password) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/user/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
 
-      if (!response.ok) {
+    if (!response.ok) {
+      // Intentar leer el JSON del error
+      let errorMessage = 'Usuario o contraseña incorrectos';
+      try {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Error en el login');
+        if (errorData && errorData.message) {
+          errorMessage = errorData.message;
+        }
+      } catch (parseError) {
+        // Aquí capturamos el error de JSON.parse y solo lo mostramos en consola
+        console.error('Error al parsear el mensaje de error JSON:', parseError);
       }
+      throw new Error(errorMessage);
+    }
 
+    // Intentar parsear la respuesta JSON de forma segura
+    try {
       const data = await response.json();
       return data;
-    } catch (error) {
-      throw new Error(error.message || 'Error en el login');
+    } catch (parseError) {
+      console.error('Error al parsear la respuesta JSON:', parseError);
+      throw new Error('Error en el servidor. Intente más tarde.');
     }
-  },
+
+  } catch (error) {
+    throw new Error(error.message || 'Error en el login');
+  }
+}
+,
 
   // Logout
   logout: () => {

@@ -21,33 +21,35 @@ const UnauthorizedScreen = () => {
   return (
     <Container maxWidth="sm" sx={{ mt: 8 }}>
       <Paper elevation={3} sx={{ p: 4, textAlign: 'center' }}>
-        <LockIcon sx={{ fontSize: 64, color: 'error.main', mb: 2 }} />
-        <Typography variant="h4" component="h1" gutterBottom color="error">
-          Acceso Denegado
-        </Typography>
-        <Typography variant="body1" sx={{ mb: 4 }}>
-          No tienes permisos para acceder a esta página.
-        </Typography>
-        <Box>
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={handleGoBack}
-            sx={{ mr: 2 }}
-          >
-            Volver
-          </Button>
-          <Button 
-            variant="outlined" 
-            onClick={() => {
-              authService.logout();
-              navigate('/login');
-            }}
-          >
-            Cerrar Sesión
-          </Button>
-        </Box>
-      </Paper>
+  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+    <Box
+      component="img"
+      src="https://cdn.document360.net/static/images/custompages/Unauthorized-user-1.svg"
+      alt="Unauthorized Access Illustration"
+      sx={{ maxWidth: '100%', height: 'auto', width: 250 }}
+    />
+  </Box>
+  <Typography variant="h4" component="h1" gutterBottom color="error">
+    Acceso Denegado
+  </Typography>
+  <Typography variant="body1" sx={{ mb: 4 }}>
+    No tienes permisos para acceder a esta página.
+  </Typography>
+  <Box>
+    <Button variant="contained" color="primary" onClick={handleGoBack} sx={{ mr: 2 }}>
+      Volver
+    </Button>
+    <Button
+      variant="outlined"
+      onClick={() => {
+        authService.logout();
+        navigate('/login');
+      }}
+    >
+      Cerrar Sesión
+    </Button>
+  </Box>
+</Paper>
     </Container>
   );
 };

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import FormTest from '../components/FormTest';
-import { getEvaluatedData, saveTest } from '../services/testService';
+import { evaluatedService } from '../services/testService';
 
 const FormTestScreen = () => {
   const [evaluados, setEvaluados] = useState([]);
@@ -17,10 +17,9 @@ const FormTestScreen = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Llamar al servicio que obtiene los evaluados
     const fetchData = async () => {
       try {
-        const data = await getEvaluatedData();
+        const data = await evaluatedService.getAllEvaluated();
         setEvaluados(data);
       } catch (error) {
         console.error("Error fetching evaluated data:", error);
@@ -31,48 +30,56 @@ const FormTestScreen = () => {
     fetchData();
   }, []);
 
+  function getUserEmailFromToken() {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+       console.log('Payload del token:', payload);
+      return payload.sub;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormTouched(true);
 
-    // Verificar si algún campo está vacío
     if (testName.trim() === '' || side === '' || message.trim() === '' || selectedEvaluado === '') {
       setResponseMessage('Por favor complete todos los campos obligatorios');
       return;
     }
 
-    // Preparar los datos para la API
     const testData = {
+      doctorEmail: getUserEmailFromToken(),
       name: testName,
       description: message,
-      evalAxis: side === 'izquierdo', // true para izq, false para derecha
-      dateTime: new Date().toISOString().replace('Z', ''), // formato 2023-08-15T14:30:15.000
+      evalAxis: side === 'izquierdo',
+      dateTime: new Date().toISOString().replace('Z', ''),
       evaluatedId: parseInt(selectedEvaluado), 
     };
 
-    console.log("Sending test data:", testData);
-
-    //solicitud a la API
     setLoading(true);
     setResponseMessage('');
 
     try {
-      const result = await saveTest(testData);
+      console.log("Datos a enviar:", testData);
+      const result = await evaluatedService.saveTest(testData);
       setLoading(false);
 
       if (result.error) {
         setResponseMessage(`Error: ${result.error}`);
       } else {
         setResponseMessage('Test guardado con éxito');
-        
         if (result.testId) {
-          // Esperar un segundo para que el usuario vea el mensaje de éxito
           setTimeout(() => {
             navigate(`/acquisition/${result.testId}`);
           }, 1000);
         }
-        
-        // resetear el formulario
+
         setTestName('');
         setSide('');
         setMessage('');
@@ -87,9 +94,7 @@ const FormTestScreen = () => {
 
   return (
     <Box sx={{ mt: 2 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Crear Nuevo Test
-      </Typography>
+    
       
       <FormTest 
         testName={testName}

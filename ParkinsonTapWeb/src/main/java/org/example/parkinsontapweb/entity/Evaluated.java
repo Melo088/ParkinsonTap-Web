@@ -37,8 +37,6 @@ public class Evaluated {
     @OneToMany(mappedBy = "evaluated", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Test> tests;
 
-    //Falta relación de doctores
-
 
     @ManyToOne
     @JoinColumn(name="doctorId")

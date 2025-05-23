@@ -1,53 +1,61 @@
-const API_BASE_URL = "http://localhost:8080";
+import { authService } from "./authService";
 
-// Función para obtener los datos evaluados
-export const getEvaluatedData = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/evaluated/data`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+export const evaluatedService = {
+  // Obtener todos los evaluados 
+  getAllEvaluated: async () => {
+    try {
+      const response = await authService.fetchWithAuth('/evaluated/data', {
+        method: 'GET'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al obtener evaluados');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching evaluated data:", error);
+      return [];
     }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching evaluated data:", error);
-    return [];
-  }
-};
+  },
 
-export const searchEvaluatedByName = async (name) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/evaluated/search?name=${name}`);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
+  // Buscar evaluado por nombre
+  searchByName: async (name) => {
+    try {
+      const response = await authService.fetchWithAuth(`/evaluated/search?name=${name}`, {
+        method: 'GET'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al buscar evaluado');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching evaluated data by name:", error);
+      return [];
     }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching evaluated data by name:", error);
-    return [];
-  }
-};
+  },
 
-export const saveTest = async (testData) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/test/save`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testData),
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(errorData || 'Error al guardar el test');
+  // Guardar un test
+  saveTest: async (testData) => {
+    try {
+      const response = await authService.fetchWithAuth('/test/save', {
+        method: 'POST',
+        body: JSON.stringify(testData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Error al guardar el test');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error("Error al guardar test:", error);
+      return { error: error.message };
     }
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error en la solicitud:", error);
-    return { error: error.message };
   }
 };

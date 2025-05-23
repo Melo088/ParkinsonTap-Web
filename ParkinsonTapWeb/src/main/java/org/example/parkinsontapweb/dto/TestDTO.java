@@ -6,8 +6,16 @@ public class TestDTO {
     public Boolean evalAxis;
     public String dateTime;
     public Integer evaluatedId;
-    public Integer doctorId; // opcional por ahora
+    public String doctorEmail;
     public Integer testId;
+
+    public String getDoctorEmail() {
+        return doctorEmail;
+    }
+
+    public void setDoctorEmail(String doctorEmail) {
+        this.doctorEmail = doctorEmail;
+    }
 
     public Integer getTestId() {
         return testId;
@@ -57,11 +65,4 @@ public class TestDTO {
         this.evaluatedId = evaluatedId;
     }
 
-    public Integer getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Integer doctorId) {
-        this.doctorId = doctorId;
-    }
 }
