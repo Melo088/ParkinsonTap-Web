@@ -1,6 +1,3 @@
-// Opción adicional: Modificar TestCard para mostrar/ocultar el botón de eliminar
-// basado en si el doctor actual es el creador del test
-
 import React from 'react';
 import {
   Card,
@@ -12,7 +9,7 @@ import {
   Chip,
   useTheme,
   alpha,
-  Divider
+  Divider,
 } from '@mui/material';
 import {
   Delete as DeleteIcon,
@@ -22,34 +19,48 @@ import {
   LocalHospital,
   HealthAndSafety,
   Analytics as AnalyticsIcon,
-  Warning as WarningIcon
+  Warning as WarningIcon,
+  ShowChart as ShowChartIcon,
+  DeleteSweep as DeleteSweepIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 
-const TestCard = ({ test, onDelete, currentDoctorEmail }) => {
+
+const TestCard = ({ test, onDelete, onDataDelete, currentDoctorEmail }) => {
   const theme = useTheme();
   const navigate = useNavigate();
 
   const handleDelete = () => {
     if (window.confirm(`¿Estás seguro de que deseas eliminar el test "${test.name}"?`)) {
-      onDelete(test.id);
+      onDelete(test.testId);
     }
   };
 
+  const handleDeleteData = async () => {
+    if (window.confirm(`¿Estás seguro de que deseas eliminar los datos del test "${test.name}"? Esta acción no se puede deshacer.`)) {
+          onDataDelete(test.testId);
+        }
+        
+    };
+
+  const handleShowGraphs = () => {
+    navigate(`/grafica/${test.testId}`);
+  };
+
   const handleAddMeasurements = () => {
-    navigate(`/acquisition/${test.id}`);
+    navigate(`/acquisition/${test.testId}`);
   };
 
   const formatDate = (dateString) => {
     try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
+      const date = new Date(dateString + 'Z');  //  Z para que JS interprete como UTC
+      return date.toLocaleString('es-ES', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+        minute: '2-digit',
+        hour: '2-digit'
+     });
     } catch (error) {
       console.error("Error al formatear fecha:", error);
       return dateString;
@@ -78,7 +89,8 @@ const TestCard = ({ test, onDelete, currentDoctorEmail }) => {
 
   // Verificar si el doctor actual puede eliminar este test
   const canDelete = !test.doctorEmail || currentDoctorEmail === test.doctorEmail;
-
+  const canAddMeasurements = test.hasData;
+  
   return (
     <Card
       elevation={0}
@@ -228,46 +240,96 @@ const TestCard = ({ test, onDelete, currentDoctorEmail }) => {
 
         {/* Configuración del test */}
         <Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-            Configuración
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+            Parámetros del Test
           </Typography>
-          <Box display="flex" gap={1} flexWrap="wrap">
-            <Chip
-              label={test.evalAxis ? 'Con evaluación de ejes' : 'Sin evaluación de ejes'}
-              size="small"
-              variant="outlined"
-              color={test.evalAxis ? 'success' : 'default'}
-            />
+          <Box display="flex" gap={2} flexWrap="wrap" alignItems="center">
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="caption" sx={{ 
+                color: 'text.secondary', 
+                textTransform: 'uppercase',
+                fontWeight: 600,
+                fontSize: '0.7rem'
+              }}>
+              </Typography>
+              <Box sx={{
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+                backgroundColor:'#fff3e0',
+                border: `1px solid ${'#ffcc02'}`,
+              }}>
+                <Typography variant="body2" sx={{ 
+                  color: '#ef6c00',
+                  fontWeight: 600,
+                  fontSize: '0.8rem'
+                }}>
+                  {test.evalAxis ? 'Lado Izquierdo' : 'Lado Derecho'}
+                </Typography>
+              </Box>
+            </Box>
           </Box>
         </Box>
       </CardContent>
 
-      <CardActions sx={{ p: 3, pt: 0, gap: 1 }}>
-        <Button
+      <CardActions sx={{ p: 2, pt: 0, gap: 1, flexWrap: 'wrap' }}>
+        {!canAddMeasurements && (
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<AnalyticsIcon />}
+            onClick={handleAddMeasurements}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 600,
+              flex: 1.5,
+              minWidth: '120px',
+              background: `linear-gradient(135deg, 
+                ${theme.palette.secondary.main}, 
+                ${theme.palette.secondary.dark})`,
+              '&:hover': {
+                background: `linear-gradient(135deg, 
+                  ${theme.palette.secondary.dark}, 
+                  ${theme.palette.secondary.main})`
+              }
+            }}
+          >
+            Tomar Medidas
+          </Button>
+        )}
+        
+        {/* Solo mostrar el botón de ver graficos si el test tiene datos */}
+        {test.hasData && (
+          <Button
           variant="contained"
           size="small"
-          startIcon={<AnalyticsIcon />}
-          onClick={handleAddMeasurements}
+          startIcon={<ShowChartIcon />}
+          onClick={handleShowGraphs}
           sx={{
             borderRadius: 2,
             textTransform: 'none',
             fontWeight: 600,
-            flex: 1,
+            flex: 1.5,
+            minWidth: '120px',
             background: `linear-gradient(135deg, 
-              ${theme.palette.secondary.main}, 
-              ${theme.palette.secondary.dark})`,
+              ${theme.palette.primary.main}, 
+              ${theme.palette.primary.dark})`,
             '&:hover': {
               background: `linear-gradient(135deg, 
-                ${theme.palette.secondary.dark}, 
-                ${theme.palette.secondary.main})`
+                ${theme.palette.primary.dark}, 
+                ${theme.palette.primary.main})`
             }
           }}
         >
-          Tomar Medidas
+          Mirar Gráficos
         </Button>
+
+        )}
         
-        {/* Solo mostrar el botón de eliminar si el doctor actual puede eliminarlo */}
-        {canDelete ? (
+        
+        {/* Solo mostrar el botón de eliminar test si el doctor actual puede eliminarlo */}
+        {canDelete && (
           <Button
             variant="outlined"
             size="small"
@@ -278,6 +340,7 @@ const TestCard = ({ test, onDelete, currentDoctorEmail }) => {
               borderRadius: 2,
               textTransform: 'none',
               fontWeight: 500,
+              minWidth: '120px',
               borderColor: alpha(theme.palette.error.main, 0.3),
               '&:hover': {
                 borderColor: theme.palette.error.main,
@@ -285,36 +348,34 @@ const TestCard = ({ test, onDelete, currentDoctorEmail }) => {
               }
             }}
           >
-            Eliminar
+            Eliminar Test
           </Button>
-        ) : (
- <Box
- sx={{
-   borderRadius: 2,
-   flex: 1,
-   background: `linear-gradient(135deg,
-     ${theme.palette.secondary.main},
-     ${theme.palette.secondary.dark})`,
-   display: 'flex',
-   alignItems: 'center',
-   justifyContent: 'center',
-   gap: 1,
-   minHeight: '34px', 
- }}
->
- <WarningIcon sx={{ width: '25px', fontSize: 16, color: 'white' }} />
- <Typography 
-   variant="body2" 
-   sx={{ 
-     fontWeight: 600,
-     color: 'white',
-     fontSize: '0.7rem'
-     
-   }}
- >
-   Solo el creador puede eliminarlo
- </Typography>
-</Box>
+        )}
+
+        
+        {/* Solo mostrar el botón de eliminar datos si el doctor actual puede eliminarlo y el test tiene datos */}
+        {canDelete && test.hasData && (
+          <Button
+            variant="outlined"
+            size="small"
+            color="warning"
+            startIcon={<DeleteSweepIcon />}
+            onClick={handleDeleteData}
+            sx={{
+              borderRadius: 2,
+              textTransform: 'none',
+              fontWeight: 500,
+              minWidth: '120px',
+              borderColor: alpha(theme.palette.warning.main, 0.3),
+              color: theme.palette.warning.main,
+              '&:hover': {
+                borderColor: theme.palette.warning.main,
+                background: alpha(theme.palette.warning.main, 0.04)
+              }
+            }}
+          >
+            Eliminar Datos
+          </Button>
         )}
       </CardActions>
     </Card>

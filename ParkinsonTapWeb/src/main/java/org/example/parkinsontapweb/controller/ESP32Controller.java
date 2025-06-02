@@ -36,7 +36,13 @@ public class ESP32Controller {
                         .body("Test con ID " + testId + " no encontrado");
             }
 
-            Test test = testOpt.get(); // If the test exists, then the following is obtained
+            boolean yaTieneLecturas = readingRepository.existsByTestId(testId);
+            if (yaTieneLecturas) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("El test ya tiene lecturas registradas. No se pueden añadir más.");
+            }
+
+            Test test = testOpt.get(); // If the test exists and does not have data, then the following is obtained
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> readingsData = (List<Map<String, Object>>) payload.get("readings");

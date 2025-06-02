@@ -42,7 +42,7 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/unauthorized" element={<UnauthorizedScreen />} />
-          <Route path="/grafica" element={<GraphScreen />} />
+          <Route path="/grafica/:testId" element={<GraphScreen />} />
           
           {/* Rutas protegidas */}
           <Route path="/" element={<ProtectedRoute />}>

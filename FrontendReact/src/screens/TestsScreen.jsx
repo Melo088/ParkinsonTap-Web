@@ -43,18 +43,39 @@ const TestScreen = () => {
   }, []);
 
   const loadTests = async () => {
-    try {
-      setLoading(true);
-      const testsData = await evaluatedService.getAllTests();
-      console.log('Tests loaded:', testsData);
-      setTests(testsData);
-      setError('');
-    } catch (error) {
-      setError('Error al cargar los tests: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    const testsData = await evaluatedService.getAllTests();
+    console.log('Tests loaded:', testsData);
+    
+    // Verificar si cada test tiene datos
+    const testsWithDataInfo = await Promise.all(
+      testsData.map(async (test) => {
+        try {
+          const hasData = await evaluatedService.hasData(test.testId);
+          return {
+            ...test,
+            hasData: hasData
+          };
+        } catch (error) {
+          console.error(`Error checking data for test ${test.testId}:`, error);
+          return {
+            ...test,
+            hasData: false
+          };
+        }
+      })
+    );
+    
+    setTests(testsWithDataInfo);
+    setError('');
+  } catch (error) {
+    console.error('Error loading tests:', error);
+    setError('Error al cargar los tests: ' + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleLogout = () => {
     authService.logout();
@@ -66,23 +87,48 @@ const TestScreen = () => {
   };
 
   const handleDeleteTest = async (testId) => {
-    try {
-      await evaluatedService.deleteTest(testId);
-      await loadTests();
-      setError('');
-      setSuccess('Test eliminado correctamente.');
-      console.log('Test deleted:', testId);
-      
-      setTimeout(() => {
-        setSuccess('');
-      }, 3000);
-
-    } catch (error) {
-      setError('Error al eliminar test: ' + error.message);
-      console.error('Error deleting test:', error);
+  try {
+    await evaluatedService.deleteTest(testId);
+    await loadTests();
+    setError('');
+    setSuccess('Test eliminado correctamente.');
+    console.log('Test deleted:', testId);
+    
+    setTimeout(() => {
       setSuccess('');
-    }
-  };
+    }, 3000);
+
+  } catch (error) {
+    setError('Error al eliminar test: ' + error.message);
+    console.error('Error deleting test:', error);
+  }
+};
+
+  const handleDataDelete = async (testId) => {
+  try {
+    await evaluatedService.deleteTestData(testId);
+    await loadTests();
+    setError('');
+    setSuccess('Datos del test eliminados correctamente.');
+    console.log('Test data deleted:', testId);
+    
+    setTimeout(() => {
+      setSuccess('');
+    }, 3000);
+
+  }
+  catch (error) {
+    setError('Error al eliminar los datos del test: ' + error.message);
+    console.error('Error deleting test data:', error);
+  }
+  setTests(prevTests => 
+    prevTests.map(test => 
+      test.testId === testId 
+        ? { ...test, hasData: false }
+        : test
+    )
+  );
+};
 
   if (loading) {
     return (
@@ -348,8 +394,7 @@ const TestScreen = () => {
               <Grid container spacing={3}>
                 {tests.map((test, index) => (
                   <Grid 
-                    size={{ xs: 12, sm: 6, md: 4 }} 
-                    key={test.id || `test-${index}`}
+                    size={{ xs: 12, sm: 6, md: 4 }} key={test.testId}
                   >
                     <Fade in timeout={600 + index * 100}>
                       <Box>
@@ -357,6 +402,7 @@ const TestScreen = () => {
                           currentDoctorEmail={authService.getCurrentUserEmail()}
                           test={test} 
                           onDelete={handleDeleteTest} 
+                          onDataDelete={handleDataDelete}
                         />
                       </Box>
                     </Fade>

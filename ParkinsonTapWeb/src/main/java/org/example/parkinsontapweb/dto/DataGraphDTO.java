@@ -1,37 +1,32 @@
 package org.example.parkinsontapweb.dto;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.example.parkinsontapweb.entity.Reading;
+
+@Getter
+@Setter
 public class DataGraphDTO {
-    private long timestamp;
-    private double accX;
-    private double accY;
+    private Float timestamp;
+    private double aX;
+    private double aY;
+    private double aZ;
 
-    public DataGraphDTO(long timestamp, double accX, double accY) {
-        this.timestamp = timestamp;
-        this.accX = accX;
-        this.accY = accY;
+    private double p;
+    private double r;
+    private double y;
+
+    private Integer testId;
+
+    public DataGraphDTO(Reading reading) {
+        this.timestamp = reading.getTime();
+        this.aX = reading.getAx();
+        this.aY = reading.getAy();
+        this.aZ = reading.getAz();
+        this.p = reading.getP();
+        this.r = reading.getR();
+        this.y = reading.getY();
+        this.testId = reading.getTest().getId();
     }
 
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public double getAccX() {
-        return accX;
-    }
-
-    public void setAccX(double accX) {
-        this.accX = accX;
-    }
-
-    public double getAccY() {
-        return accY;
-    }
-
-    public void setAccY(double accY) {
-        this.accY = accY;
-    }
 }

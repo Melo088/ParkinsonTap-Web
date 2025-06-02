@@ -129,7 +129,6 @@ public class TestController {
         }
 
     }
-
     // Endpoint para obtener todos test
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('DOCTOR')")
@@ -140,6 +139,19 @@ public class TestController {
                 .toList();
         return ResponseEntity.ok(testDTOS);
     }
+
+    @GetMapping("/hasData/{id}")
+    @PreAuthorize("hasAuthority('DOCTOR')")
+    public ResponseEntity<Map<String, Object>> hasData(@PathVariable Integer id) {
+        boolean tieneLecturas = readingRepository.existsByTestId(id);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("hasData", tieneLecturas);
+
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 }
