@@ -1,5 +1,7 @@
 package org.example.parkinsontapweb.dto;
 
+import org.example.parkinsontapweb.entity.Test;
+
 public class TestDTO {
     public String name;
     public String description;
@@ -8,6 +10,45 @@ public class TestDTO {
     public Integer evaluatedId;
     public String doctorEmail;
     public Integer testId;
+    public String evaluatedTypeName;
+    public String doctorFirstName;
+    public String doctorLastName;
+
+    public TestDTO() {
+
+    }
+
+    public TestDTO(Test test) {
+        this.testId = test.getId();
+        this.name = test.getName();
+        this.description = test.getDescription();
+        this.evalAxis = test.getEvalAxis();
+        this.dateTime = test.getDateTime() != null ? test.getDateTime().toString() : null;
+        this.evaluatedId = test.getEvaluated() != null ? test.getEvaluated().getId() : null;
+        this.doctorEmail = test.getDoctor() != null ? test.getDoctor().getEmail() : null;
+        this.evaluatedTypeName = (test.getEvaluated() != null &&
+                test.getEvaluated().getEvaluatedType() != null)
+                ? test.getEvaluated().getEvaluatedType().getTypeName()
+                : null;
+        this.doctorFirstName = test.getDoctor() != null ? test.getDoctor().getFirstName() : null;
+        this.doctorLastName =  test.getDoctor() != null ? test.getDoctor().getLastName() : null;
+    }
+
+    public String getDoctorFirstName() {
+        return doctorFirstName;
+    }
+
+    public void setDoctorFirstName(String doctorFirstName) {
+        this.doctorFirstName = doctorFirstName;
+    }
+
+    public String getDoctorLastName() {
+        return doctorLastName;
+    }
+
+    public void setDoctorLastName(String doctorLastName) {
+        this.doctorLastName = doctorLastName;
+    }
 
     public String getDoctorEmail() {
         return doctorEmail;
@@ -65,4 +106,11 @@ public class TestDTO {
         this.evaluatedId = evaluatedId;
     }
 
+    public String getEvaluatedTypeName() {
+        return evaluatedTypeName;
+    }
+
+    public void setEvaluatedTypeName(String evaluatedTypeName) {
+        this.evaluatedTypeName = evaluatedTypeName;
+    }
 }

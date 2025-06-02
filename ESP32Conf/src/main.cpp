@@ -7,8 +7,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid = "LABREDES";
+const char* password = "F0rmul4-1";
 
 // MQTT params
 const char* mqttServer = "broker.emqx.io";
@@ -23,7 +23,7 @@ PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
 const char* topic = "esp32/data";
-String url = "http://192.168.1.3:8080/api/esp32/batch-readings";
+String url = "http://192.168.130.56:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;

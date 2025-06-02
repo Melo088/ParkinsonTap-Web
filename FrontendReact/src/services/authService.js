@@ -1,5 +1,4 @@
 const API_BASE_URL = 'http://localhost:8080/api';
-
 const getToken = () => localStorage.getItem('token');
 
 // Encabezados comunes con token
@@ -65,6 +64,15 @@ export const authService = {
   // Obtener el rol del usuario
   getUserRole: () => {
     return localStorage.getItem('userRole');
+  },
+
+    getCurrentUserEmail: () => {
+    const token = getToken();
+    if (!token) return null;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!payload) return null;
+    return payload.sub || null;
   },
 
   // Verificar si el token ha expirado

@@ -1,6 +1,7 @@
 package org.example.parkinsontapweb.config;
 
 import lombok.RequiredArgsConstructor;
+
 import org.example.parkinsontapweb.entity.User;
 import org.example.parkinsontapweb.repository.UserRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-@Service
+@Service()
 @RequiredArgsConstructor
 public class UserDetailsConf implements UserDetailsService {
 

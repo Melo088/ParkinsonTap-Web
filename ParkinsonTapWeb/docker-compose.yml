@@ -9,7 +9,7 @@ services:
     ports:
       - "5433:5432"
     expose:
-      - '5432'
+      - '5433'
     volumes:
       - parkinsontap-data:/var/lib/postgresql/data:rw
 

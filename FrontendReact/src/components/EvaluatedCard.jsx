@@ -18,10 +18,13 @@ import {
   Male as MaleIcon,
   Female as FemaleIcon,
   Medication as MedicationIcon,
+  Assessment as AssessmentIcon,
 } from "@mui/icons-material";
+import { useNavigate } from 'react-router-dom';
 
 const EvaluatedCard = ({ evaluated, onDelete }) => {
   const [expanded, setExpanded] = useState(false);
+  const navigate = useNavigate();
   
   const handleDelete = () => {
     if (
@@ -35,6 +38,12 @@ const EvaluatedCard = ({ evaluated, onDelete }) => {
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
+  };
+
+  const handleCreateTest = (e) => {
+    e.stopPropagation(); // Evitar que se expanda al hacer click en crear test
+    // Navegar al formulario de test con el ID del evaluado
+    navigate(`/test/${evaluated.id}`);
   };
 
   // Función para calcular la edad
@@ -167,7 +176,21 @@ const EvaluatedCard = ({ evaluated, onDelete }) => {
         </CardContent>
       </Collapse>
 
-      <CardActions>
+      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+        <Button
+          size="small"
+          color="primary"
+          variant="contained"
+          startIcon={<AssessmentIcon />}
+          onClick={handleCreateTest}
+          sx={{
+            textTransform: 'none',
+            fontWeight: 500,
+            borderRadius: 2
+          }}
+        >
+          Crear Test
+        </Button>
         <Button
           size="small"
           color="error"

@@ -10,7 +10,9 @@ import {
 } from '@mui/material';
 import { Delete as DeleteIcon, Person as PersonIcon } from '@mui/icons-material';
 
+
 const DoctorCard = ({ doctor, onDelete }) => {
+  console.log("DoctorCard props:", doctor);
   const handleDelete = () => {
     if (window.confirm(`¿Estás seguro de que deseas eliminar al Dr. ${doctor.firstName} ${doctor.lastName}?`)) {
       onDelete(doctor.id);

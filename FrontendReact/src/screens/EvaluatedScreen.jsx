@@ -101,12 +101,9 @@ const EvaluatedScreen = () => {
     }
   };
 
-  const handleCreateTest = () => {
-    if (evaluatedList.length === 0) {
-      setError('No se puede crear un test sin evaluados. Agregue al menos un evaluado primero.');
-      return;
-    }
-    navigate('/form');
+  const handleAdministrateTests = () => {
+    
+    navigate('/tests');
   };
 
   // Separar pacientes y controles 
@@ -230,7 +227,7 @@ const EvaluatedScreen = () => {
                   <Button
                     variant="outlined"
                     startIcon={<AssessmentIcon />}
-                    onClick={handleCreateTest}
+                    onClick={handleAdministrateTests}
                     disabled={evaluatedList.length === 0}
                     sx={{
                       borderRadius: 2,
@@ -249,7 +246,7 @@ const EvaluatedScreen = () => {
                       }
                     }}
                   >
-                    Crear Test
+                    Administrar Test
                   </Button>
                   <Button
                     variant="contained"

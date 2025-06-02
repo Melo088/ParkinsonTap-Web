@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "*")
+@CrossOrigin("*")
 public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
@@ -34,5 +34,6 @@ public class UserController {
         String token = jwtProvider.generateToken(authentication);
         return new ResponseEntity<>(new DtoAuthResponse(token), HttpStatus.OK);
     }
+
 
 }
