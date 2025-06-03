@@ -14,7 +14,7 @@ export function connectMQTT() {
   });
 }
 
-export function sendStartMessage(testId) {
+export function sendStartMessage(testId, duration = 10) {
   if (!client || !client.isConnected()) {
     console.error("Cliente MQTT no conectado");
     return;
@@ -26,7 +26,8 @@ export function sendStartMessage(testId) {
   if (testId) {
     messageData = JSON.stringify({
       command: "start",
-      testId: parseInt(testId)
+      testId: parseInt(testId),
+      duration: parseInt(duration) 
     });
     message = new Paho.MQTT.Message(messageData);
   } else {
@@ -36,8 +37,6 @@ export function sendStartMessage(testId) {
 
   message.destinationName = "esp32/data";
   client.send(message);
-
   console.log("Mensaje enviado:", messageData);
-  alert("Mensaje enviado correctamente");
-  window.location.href = "/doctor";
+  alert(`Mensaje enviado correctamente. Duración: ${duration} segundos`);
 }

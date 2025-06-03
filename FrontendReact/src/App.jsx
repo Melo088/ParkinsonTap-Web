@@ -42,7 +42,6 @@ function App() {
           {/* Rutas públicas */}
           <Route path="/login" element={<LoginScreen />} />
           <Route path="/unauthorized" element={<UnauthorizedScreen />} />
-          <Route path="/grafica/:testId" element={<GraphScreen />} />
           
           {/* Rutas protegidas */}
           <Route path="/" element={<ProtectedRoute />}>
@@ -61,6 +60,8 @@ function App() {
               
               {/* Rutas protegidas solo para DOCTOR */}
               <Route element={<ProtectedRoute requiredRole="DOCTOR" />}>
+                <Route path="/grafica/:testId" element={<GraphScreen />} />
+
                 {/* Ruta para formulario general (mantenemos por compatibilidad) */}
                 <Route path="form" element={
                   <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>

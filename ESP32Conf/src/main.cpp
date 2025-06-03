@@ -42,7 +42,7 @@ void displayMenu() {
   Serial.println("\n===== SISTEMA DE CAPTURA DE DATOS IMU =====");
   Serial.println("Comandos disponibles:");
   Serial.println("g - Realizar GET HTTP");
-  Serial.println("p - Realizar POST HTTP con datos del MPU6050");
+  Serial.println("p - Realizar POST HTTP con datos del MPU6050 (10s por defecto)");
   Serial.println("m - Mostrar este menú nuevamente");
   Serial.println("=========================================");
 }
@@ -142,24 +142,32 @@ void updateAngles() {
 
 int currentTestId = 0;
 
-void httpPOST() {
+void httpPOST(int durationSeconds = 10) {
   // Activar la visualización de datos del IMU durante la prueba
   showImuData = true;
   
+  // Calcular el número de lecturas basado en la duración y frecuencia de muestreo (25 Hz)
+  int totalReadings = durationSeconds * 25;
+  int sampleIntervalMs = 40; // 40ms = 25 Hz
+  
   Serial.println("\nIniciando captura de datos...");
-  Serial.println("Realizando 250 lecturas (aproximadamente 10 segundos)");
+  Serial.print("Duración: ");
+  Serial.print(durationSeconds);
+  Serial.print(" segundos (");
+  Serial.print(totalReadings);
+  Serial.println(" lecturas)");
   Serial.println("-------------------------------------");
   
   // Iniciar la construcción del JSON manualmente
-  String json = "{\"testId\":" + String(currentTestId) + ",\"readings\":[";
+  String json = "{\"testId\":" + String(currentTestId) + ",\"duration\":" + String(durationSeconds) + ",\"readings\":[";
   
-  unsigned long startTime = millis();   // Guardar el tiempo de inicio
-  unsigned long lastSampleTime = startTime;  // Guardar el tiempo de la última muestra
+  unsigned long startTime = millis();
+  unsigned long lastSampleTime = startTime;
   
-  for (int i = 0; i < 250; ) {  // incremento i manual
+  for (int i = 0; i < totalReadings; ) {
     unsigned long currentTime = millis();
     
-    if (currentTime - lastSampleTime >= 40) {  // Si han pasado 40 ms
+    if (currentTime - lastSampleTime >= sampleIntervalMs) {
       // Actualizar los ángulos
       updateAngles();
       
@@ -169,7 +177,7 @@ void httpPOST() {
       
       // Añadir esta lectura al JSON como un objeto
       json += "{";
-      json += "\"time\":" + String(currentTime - startTime) + ",";  // Tiempo real transcurrido
+      json += "\"time\":" + String(currentTime - startTime) + ",";
       json += "\"ax\":" + String(a.acceleration.x) + ",";
       json += "\"ay\":" + String(a.acceleration.y) + ",";
       json += "\"az\":" + String(a.acceleration.z) + ",";
@@ -179,30 +187,42 @@ void httpPOST() {
       json += "}";
       
       // Añadir coma excepto para el último elemento
-      if (i < 249) {
+      if (i < totalReadings - 1) {
         json += ",";
       }
       
-      // Mostrar los valores en el monitor serial cada 10 lecturas
-      if (showImuData && i % 10 == 0) {
-        Serial.print("Lectura ");
-        Serial.print(i);
-        Serial.print(": ax=");
-        Serial.print(a.acceleration.x);
+      // Mostrar progreso cada 25 lecturas (1 segundo)
+      if (showImuData && i % 25 == 0) {
+        int elapsedSeconds = (currentTime - startTime) / 1000;
+        Serial.print("Progreso: ");
+        Serial.print(elapsedSeconds);
+        Serial.print("/");
+        Serial.print(durationSeconds);
+        Serial.print("s (");
+        Serial.print((i * 100) / totalReadings);
+        Serial.print("%) - ");
+        Serial.print("ax=");
+        Serial.print(a.acceleration.x, 2);
         Serial.print(" ay=");
-        Serial.print(a.acceleration.y);
+        Serial.print(a.acceleration.y, 2);
         Serial.print(" az=");
-        Serial.print(a.acceleration.z);
-        Serial.print(" Yaw=");
-        Serial.print(compAngleZ);
-        Serial.print(" Pitch=");
-        Serial.print(compAngleY);
-        Serial.print(" Roll=");
-        Serial.println(compAngleX);
+        Serial.print(a.acceleration.z, 2);
+        Serial.print(" Y=");
+        Serial.print(compAngleZ, 1);
+        Serial.print(" P=");
+        Serial.print(compAngleY, 1);
+        Serial.print(" R=");
+        Serial.println(compAngleX, 1);
       }
       
       lastSampleTime = currentTime;
-      i++;  
+      i++;
+    }
+    
+    // Verificar si se ha excedido el tiempo máximo (con un margen del 10%)
+    if (currentTime - startTime > (durationSeconds * 1100)) {
+      Serial.println("Tiempo máximo excedido, finalizando captura...");
+      break;
     }
   }
   
@@ -211,18 +231,25 @@ void httpPOST() {
   
   // Desactivar la visualización de datos del IMU
   showImuData = false;
+  unsigned long totalTime = millis() - startTime;
   Serial.println("-------------------------------------");
-  Serial.println("Captura de datos completada!");
+  Serial.print("Captura de datos completada en ");
+  Serial.print(totalTime / 1000.0, 2);
+  Serial.println(" segundos!");
   
-  // Debug: Mostrar una pequeña muestra de la estructura de JSON
-  Serial.println("Enviando JSON con la siguiente estructura:");
-  Serial.print(json.substring(0, 200));
-  Serial.println("... (truncado)");
+  // Debug: Mostrar información del JSON
+  Serial.println("Enviando datos al servidor...");
+  Serial.print("Tamaño del JSON: ");
+  Serial.print(json.length());
+  Serial.println(" bytes");
   
   // Enviar los datos mediante HTTP POST
   HTTPClient http;
   http.begin(url.c_str());
   http.addHeader("Content-Type", "application/json");
+  
+  // Aumentar el timeout para transmisiones más largas
+  http.setTimeout(30000); // 30 segundos
   
   int httpResponseCode = http.POST(json);
   
@@ -272,11 +299,8 @@ void initWiFi() {
     Serial.println("\nNo se pudo conectar al WiFi. Intente nuevamente.");
   }
   
-  // Mostrar el menú de nuevo después de completar la operación
   displayMenu();
 }
-
-
 
 void callback(char* topic, byte* payload, unsigned int length) {
   String message = "";
@@ -292,8 +316,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   if(message == "start"){
     initWiFi();
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("Realizando HTTP POST con datos del MPU6050...");
-      httpPOST();
+      Serial.println("Realizando HTTP POST con datos del MPU6050 (10s por defecto)...");
+      httpPOST(10); // Duración por defecto
     } else {
       Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
     }
@@ -309,22 +333,43 @@ void callback(char* topic, byte* payload, unsigned int length) {
     return;
   }
   
-  // Verificar si el mensaje tiene el comando "start" y un testId
+  // Verificar si el mensaje tiene el comando "start"
   if (jsonMessage.hasOwnProperty("command") && String((const char*)jsonMessage["command"]) == "start") {
+    // Obtener el testId
     if (jsonMessage.hasOwnProperty("testId")) {
       currentTestId = (int)jsonMessage["testId"];
       Serial.print("ID del test recibido: ");
       Serial.println(currentTestId);
-      
-      initWiFi();
-      if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("Realizando HTTP POST con datos del MPU6050...");
-        httpPOST(); // Esta función ahora usará currentTestId
-      } else {
-        Serial.println("Error: No hay conexión WiFi. Usa 'w' para conectarte primero.");
-      }
+    }
+    
+    // Obtener la duración (por defecto 10 segundos)
+    int duration = 10;
+    if (jsonMessage.hasOwnProperty("duration")) {
+      duration = (int)jsonMessage["duration"];
+      Serial.print("Duración recibida: ");
+      Serial.print(duration);
+      Serial.println(" segundos");
     } else {
-      Serial.println("Comando 'start' recibido pero falta el ID del test");
+      Serial.println("Duración no especificada, usando 10 segundos por defecto");
+    }
+    
+    // Validar la duración (entre 5 y 60 segundos)
+    if (duration < 5) {
+      duration = 5;
+      Serial.println("Duración ajustada a 5 segundos (mínimo)");
+    } else if (duration > 60) {
+      duration = 60;
+      Serial.println("Duración ajustada a 60 segundos (máximo)");
+    }
+    
+    initWiFi();
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.print("Realizando HTTP POST con datos del MPU6050 por ");
+      Serial.print(duration);
+      Serial.println(" segundos...");
+      httpPOST(duration);
+    } else {
+      Serial.println("Error: No hay conexión WiFi.");
     }
   } else {
     Serial.println("Comando desconocido en el mensaje JSON");
@@ -333,38 +378,30 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
 void setup() {
   Serial.begin(115200);
-  Wire.begin();  // Iniciar I2C
+  Wire.begin();
   WiFi.mode(WIFI_STA);
   
-  // Espera para que el monitor serial se conecte
   delay(3000);
-  
   Serial.println("\n\n\n");
   
-  // Inicializamos el MPU6050
   initMPU();
   
-  // Inicializa el cliente MQTT
   mqttClient.setServer(mqttServer, mqttPort);
   mqttClient.setCallback(callback);
   
-  // Mostrar el menú de comandos pero actualizado (sin la opción 'w')
   displayMenu();
   
-  // Pequeña pausa y luego iniciar la conexión WiFi automáticamente
   Serial.println("Iniciando conexión WiFi automáticamente en 3 segundos...");
   delay(3000);
   initWiFi();
 }
 
 void loop() {
-  // Procesar eventos MQTT solo si estamos conectados
   if (WiFi.status() == WL_CONNECTED) {
     mqttClient.loop();
     keepAlive();
   }
   
-  // Procesar comandos del puerto serial
   if (Serial.available() > 0) {
     String data = Serial.readStringUntil('\n');
     
@@ -372,18 +409,18 @@ void loop() {
       if (WiFi.status() == WL_CONNECTED) {
         Serial.println("Realizando HTTP GET...");
         httpGET();
-        displayMenu();  // Mostrar menú después de completar la operación
+        displayMenu();
       } else {
         Serial.println("Error: No hay conexión WiFi.");
-        initWiFi();  // Intentar reconectar automáticamente
+        initWiFi();
       }
     } else if (data == "p") {
       if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("Realizando HTTP POST con datos del MPU6050...");
-        httpPOST();
+        Serial.println("Realizando HTTP POST con datos del MPU6050 (10s)...");
+        httpPOST(10);
       } else {
         Serial.println("Error: No hay conexión WiFi.");
-        initWiFi();  // Intentar reconectar automáticamente
+        initWiFi();
       }
     } else if (data == "m") {
       displayMenu();
