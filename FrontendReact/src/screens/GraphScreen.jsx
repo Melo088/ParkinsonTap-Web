@@ -66,7 +66,7 @@ const GraphScreen = () => {
   };
 
   const handleGoBack = () => {
-    navigate(-1); // Regresa a la página anterior
+    navigate("/tests"); 
   };
 
   // Función para recargar datos

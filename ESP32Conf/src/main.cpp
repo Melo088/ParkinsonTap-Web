@@ -7,8 +7,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-const char* ssid = "casita";
-const char* password = "1004214610";
+const char* ssid = "LABREDES";
+const char* password = "F0rmul4-1";
 
 // MQTT params
 const char* mqttServer = "broker.emqx.io";
@@ -23,7 +23,9 @@ PubSubClient mqttClient(wifiClient);
 
 // Configuración del topic
 const char* topic = "esp32/data";
-String url = "http://192.168.1.3:8080/api/esp32/batch-readings";
+const char* responseTopic = "esp32/response";
+
+String url = "http://192.168.130.56:8080/api/esp32/batch-readings";
 
 // Variables para el cálculo de ángulos
 double compAngleX = 0, compAngleY = 0, compAngleZ = 0;
@@ -253,17 +255,51 @@ void httpPOST(int durationSeconds = 10) {
   
   int httpResponseCode = http.POST(json);
   
+  // Crear mensaje de respuesta para MQTT
+  String responseMessage;
+  bool success = false;
+  
   if (httpResponseCode > 0) {
     Serial.print("HTTP Response code: ");
     Serial.println(httpResponseCode);
     String payload = http.getString();
     Serial.println(payload);
+    
+    // Verificar si la respuesta indica éxito (códigos 200-299)
+    if (httpResponseCode >= 200 && httpResponseCode < 300) {
+      success = true;
+      responseMessage = "{\"testId\":" + String(currentTestId) + 
+                       ",\"status\":\"success\"" +
+                       ",\"message\":\"Datos guardados correctamente\"" +
+                       ",\"readingsCount\":" + String(totalReadings) +
+                       ",\"duration\":" + String(durationSeconds) + "}";
+    } else {
+      responseMessage = "{\"testId\":" + String(currentTestId) + 
+                       ",\"status\":\"error\"" +
+                       ",\"message\":\"Error del servidor: " + String(httpResponseCode) + "\"" +
+                       ",\"httpCode\":" + String(httpResponseCode) + "}";
+    }
   } else {
     Serial.print("Error code: ");
     Serial.println(httpResponseCode);
+    responseMessage = "{\"testId\":" + String(currentTestId) + 
+                     ",\"status\":\"error\"" +
+                     ",\"message\":\"Error de conexión HTTP\"" +
+                     ",\"httpCode\":" + String(httpResponseCode) + "}";
   }
   
   http.end();
+  
+  // Publicar respuesta en MQTT
+  if (mqttClient.connected()) {
+    Serial.println("Publicando respuesta en MQTT...");
+    Serial.println("Mensaje de respuesta: " + responseMessage);
+    mqttClient.publish(responseTopic, responseMessage.c_str());
+    Serial.println("Respuesta publicada en topic: " + String(responseTopic));
+  } else {
+    Serial.println("Cliente MQTT no conectado, no se pudo publicar respuesta");
+  }
+  
   displayMenu();
 }
 
