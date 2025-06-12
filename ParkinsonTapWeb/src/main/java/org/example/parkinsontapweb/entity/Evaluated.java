@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "evaluated")
@@ -28,6 +29,34 @@ public class Evaluated {
     @Column(columnDefinition = "TEXT")
     private String notes;
     private Boolean status;
+
+    /*cascade nos permite establecer las acciones entre las clases relacionadas como
+    (eliminación, actuzalización etc ... .ALL -> aplica todas las cascadas
+    */
+    // Crear evaluated sin ningún test
+    @OneToMany(mappedBy = "evaluated", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Test> tests;
+
+
+    @ManyToOne
+    @JoinColumn(name="doctorId")
+    private Doctor doctor;
+
+    public Doctor getDoctor() {
+        return doctor;
+    }
+
+    public void setDoctor(Doctor doctor) {
+        this.doctor = doctor;
+    }
+
+    public List<Test> getTests() {
+        return tests;
+    }
+
+    public void setTests(List<Test> tests) {
+        this.tests = tests;
+    }
 
     public void setId(Integer id) {
         this.id = id;
