@@ -1,4 +1,4 @@
-<h1 align="center" style="color:#2e86de;">💡 ParkinsonTap-Web-Check</h1>
+<h1 align="center" style="color:#2e86de;">💡 ParkinsonTap-Web</h1>
 
 <p align="center" style="color:#34495e;">
 Una plataforma web interactiva para el análisis de síntomas motores del Parkinson a través de una prueba de tapping.
@@ -6,28 +6,21 @@ Una plataforma web interactiva para el análisis de síntomas motores del Parkin
 
 ---
 
-### 🎯 <span style="color:#27ae60;">¿Qué es ParkinsonTap-Web-Check?</span>
+### 🎯 <span style="color:#27ae60;">¿Qué es ParkinsonTap-Web?</span>
 
-ParkinsonTap-Web-Check es una plataforma **web interactiva** que facilita el análisis de los síntomas motores relacionados con la enfermedad de Parkinson a través de una prueba de **tapping**. Esta prueba permite detectar y registrar **cuán frecuentemente y con qué precisión** una persona puede tocar un área específica en pantalla, siendo útil para evaluar **la bradicinesia**.
+ParkinsonTap-Web es una plataforma **web interactiva** diseñada para apoyar a profesionales de la salud en la evaluación y seguimiento de evaluados con enfermedad o indicios de Parkinson. A través de una prueba de **tapping**, donde la persona realiza movimientos repetitivos de **toque entre el índice y el pulgar**, se capturan datos mediante un **sensor inercial (MPU)**, estos datos permiten analizar características del movimiento, como la **frecuencia, amplitud y regularidad**, siendo útiles para la evaluación de **la bradicinesia**, uno de los síntomas motores característicos de la enfermedad.
 
 ---
 
 ### ⚙️ <span style="color:#e67e22;">Tecnología e Integración</span>
 
-- 🌐 **Entorno web responsivo**  
-- 🔌 **Integración con hardware ESP32**  
-- 📱 Compatible con **dispositivos como computadoras**  
-- 🧠 Pensado para **entornos clínicos, domésticos o de investigación**  
-- 🔧 Backend en **PlatformIO para ESP32**  
-- 🎨 Frontend con **HTML, CSS y JavaScript**
-
----
-
-### 🧩 <span style="color:#8e44ad;">Interfaz Intuitiva y Funcional</span>
-
-Diseñada con **tecnologías web modernas**, sin necesidad de instalaciones. Permite interacción:
-- A través de sensores conectados  
-Esto facilita la medición de **coordinación motora fina** en múltiples contextos.
+- 🌐 Plataforma web responsiva desarrollada con React
+- 🔌 Integración con hardware ESP32 y sensor MPU6050, programados con _PlatformIO_
+- 🖥️ Compatible con computadoras de escritorio y portátiles
+- 🧠 Diseñada para entornos clínicos, domésticos o de investigación
+- 🛠️ Backend desarrollado con _Spring Boot_
+- 🗄️ Base de datos gestionada con _PostgreSQL_
+- 📦 Uso de herramientas del ecosistema _npm_ para gestión de dependencias del frontend
 
 ---
 
@@ -36,17 +29,16 @@ Esto facilita la medición de **coordinación motora fina** en múltiples contex
 - Módulo de configuración en ESP32 para recolección y transmisión eficiente de datos  
 - Separación clara entre frontend y backend  
 - Preparado para la **escalabilidad y mantenimiento futuro**  
-- Sincronización precisa entre hardware e interfaz
+- Sincronización entre hardware e interfaz
 
 ---
 
 ### 📊 <span style="color:#16a085;">Visualización de Resultados</span>
 
 La plataforma incluye una interfaz para:
-- Visualizar **frecuencia de tapping**  
-- Detectar **errores cometidos**  
-- Medir **tiempos de respuesta**  
-Toda la información se puede exportar para análisis más profundo o para compartir con profesionales de la salud.
+- Visualizar gráficamente los movimientos capturados por el sensor, como los cambios en orientación y aceleración durante la prueba de tapping
+- Exportar los datos para análisis más detallado o para compartir con profesionales de la salud
+- Gestionar usuarios y roles: los administradores pueden registrar y administrar doctores, mientras que los doctores tienen acceso a la gestión de pacientes evaluados, tests realizados y las mediciones 
 
 ---
 
@@ -54,21 +46,7 @@ Toda la información se puede exportar para análisis más profundo o para compa
 
 - Carpetas separadas para:  
   - 🖥️ **Frontend**  
-  - 🔧 **Configuración ESP32**  
-  - 🧪 **Entorno de pruebas básico**  
+  - 🔧 **Backend**  
+  - 🛠️ **Configuración ESP32**  
  
 ---
-
-### 🤝 <span style="color:#d35400;">Un Proyecto Abierto y Social</span>
-
-Este proyecto:
-- **Es de código abierto**  
-- Busca involucrar a **desarrolladores, clínicos y familiares**  
-- Tiene un propósito **complementario** a las evaluaciones clínicas tradicionales  
-- Apunta a mejorar la calidad de vida de personas con Parkinson
-
----
-
-### 🙌 <span style="color:#9b59b6;">¡Súmate al desarrollo!</span>
-
-**ParkinsonTap-Web-Check** es una iniciativa que fusiona electrónica, web y medicina. Invitamos a la comunidad a contribuir al crecimiento de esta herramienta abierta y accesible.
