@@ -56,9 +56,7 @@ Toda la información se puede exportar para análisis más profundo o para compa
   - 🖥️ **Frontend**  
   - 🔧 **Configuración ESP32**  
   - 🧪 **Entorno de pruebas básico**  
-- Incluye:  
  
-
 ---
 
 ### 🤝 <span style="color:#d35400;">Un Proyecto Abierto y Social</span>
