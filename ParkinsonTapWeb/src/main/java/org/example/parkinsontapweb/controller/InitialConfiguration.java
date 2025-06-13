@@ -26,6 +26,8 @@ public class InitialConfiguration {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EvaluatedRepository evaluatedRepository;
 
     @PostConstruct
     public void init() {
@@ -61,6 +63,7 @@ public class InitialConfiguration {
             controles.setTypeName("CONTROLES");
             evaluatedTypeRepository.save(controles);
         }
+
 
         // Crear usuario admin solo si no existe ya un admin con ese email
         if (!userRepository.existsByEmail("admin3")) {
