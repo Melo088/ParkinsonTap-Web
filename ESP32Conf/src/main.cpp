@@ -7,8 +7,8 @@
 #include <Adafruit_Sensor.h>
 #include <Wire.h>
 
-const char* ssid = "LABREDES";
-const char* password = "F0rmul4-1";
+const char* ssid = "";
+const char* password = "";
 
 // MQTT params
 const char* mqttServer = "broker.emqx.io";
