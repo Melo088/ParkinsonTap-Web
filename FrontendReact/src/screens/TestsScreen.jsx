@@ -1,0 +1,447 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Alert,
+  CircularProgress,
+  Fab,
+  Card,
+  CardContent,
+  Chip,
+  useTheme,
+  alpha,
+  Fade,
+  Slide
+} from '@mui/material';
+import { 
+  Add as AddIcon, 
+  Assessment as AssessmentIcon,
+  ExitToApp,
+  Science,
+  PostAdd
+} from '@mui/icons-material';
+import { evaluatedService } from '../services/testService';
+import TestCard from '../components/TestCard';
+import Grid from '@mui/material/Grid';
+
+console.log('TestScreen loaded');
+
+const TestScreen = () => {
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const [tests, setTests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    loadTests();
+  }, []);
+
+  const loadTests = async () => {
+  try {
+    setLoading(true);
+    const testsData = await evaluatedService.getAllTests();
+    console.log('Tests loaded:', testsData);
+    
+    // Verificar si cada test tiene datos
+    const testsWithDataInfo = await Promise.all(
+      testsData.map(async (test) => {
+        try {
+          const hasData = await evaluatedService.hasData(test.testId);
+          return {
+            ...test,
+            hasData: hasData
+          };
+        } catch (error) {
+          console.error(`Error checking data for test ${test.testId}:`, error);
+          return {
+            ...test,
+            hasData: false
+          };
+        }
+      })
+    );
+    
+    setTests(testsWithDataInfo);
+    setError('');
+  } catch (error) {
+    console.error('Error loading tests:', error);
+    setError('Error al cargar los tests: ' + error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleLogout = () => {
+    authService.logout();
+    navigate('/login');
+  };
+
+  const handleCreateTest = () => {
+    navigate('/form');
+  };
+
+  const handleDeleteTest = async (testId) => {
+  try {
+    await evaluatedService.deleteTest(testId);
+    await loadTests();
+    setError('');
+    setSuccess('Test eliminado correctamente.');
+    console.log('Test deleted:', testId);
+    
+    setTimeout(() => {
+      setSuccess('');
+    }, 3000);
+
+  } catch (error) {
+    setError('Error al eliminar test: ' + error.message);
+    console.error('Error deleting test:', error);
+  }
+};
+
+  const handleDataDelete = async (testId) => {
+  try {
+    await evaluatedService.deleteTestData(testId);
+    await loadTests();
+    setError('');
+    setSuccess('Datos del test eliminados correctamente.');
+    console.log('Test data deleted:', testId);
+    
+    setTimeout(() => {
+      setSuccess('');
+    }, 3000);
+
+  }
+  catch (error) {
+    setError('Error al eliminar los datos del test: ' + error.message);
+    console.error('Error deleting test data:', error);
+  }
+  setTests(prevTests => 
+    prevTests.map(test => 
+      test.testId === testId 
+        ? { ...test, hasData: false }
+        : test
+    )
+  );
+};
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: `linear-gradient(135deg, 
+            ${alpha(theme.palette.primary.main, 0.05)} 0%, 
+            ${alpha(theme.palette.secondary.main, 0.05)} 100%)`
+        }}
+      >
+        <Box textAlign="center">
+          <CircularProgress 
+            size={48} 
+            sx={{ 
+              color: theme.palette.primary.main,
+              mb: 2 
+            }} 
+          />
+          <Typography variant="body1" color="text.secondary">
+            Cargando tests...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, 
+          ${alpha(theme.palette.primary.main, 0.02)} 0%, 
+          ${alpha(theme.palette.secondary.main, 0.02)} 100%)`,
+        pb: 4
+      }}
+    >
+      <Container maxWidth="lg" sx={{ pt: 3 }}>
+        {/* Header Section */}
+        <Fade in timeout={600}>
+          <Card
+            elevation={0}
+            sx={{
+              mb: 4,
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              borderRadius: 3
+            }}
+          >
+            <CardContent sx={{ p: 4 }}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Box
+                    sx={{
+                      width: 48,
+                      height: 48,
+                      borderRadius: 2,
+                      background: `linear-gradient(135deg, 
+                        ${theme.palette.primary.main}, 
+                        ${theme.palette.primary.dark})`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                  >
+                    <AssessmentIcon sx={{ color: 'white', fontSize: 24 }} />
+                  </Box>
+                  <Box>
+                    <Typography 
+                      variant="h4" 
+                      component="h1" 
+                      sx={{ 
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        mb: 0.5
+                      }}
+                    >
+                      Gestión de Tests
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Administra y supervisa todos los tests del sistema
+                    </Typography>
+                  </Box>
+                </Box>
+
+                <Box display="flex" gap={2} flexWrap="wrap">
+                  <Button
+                    variant="outlined"
+                    startIcon={<ExitToApp />}
+                    onClick={handleLogout}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      borderColor: alpha(theme.palette.error.main, 0.3),
+                      color: theme.palette.error.main,
+                      '&:hover': {
+                        borderColor: theme.palette.error.main,
+                        background: alpha(theme.palette.error.main, 0.04)
+                      }
+                    }}
+                  >
+                    Cerrar Sesión
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<PostAdd />}
+                    onClick={handleCreateTest}
+                    sx={{
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      background: `linear-gradient(135deg, 
+                        ${theme.palette.secondary.main}, 
+                        ${theme.palette.secondary.dark})`,
+                      boxShadow: `0 4px 12px ${alpha(theme.palette.secondary.main, 0.3)}`,
+                      '&:hover': {
+                        background: `linear-gradient(135deg, 
+                          ${theme.palette.secondary.dark}, 
+                          ${theme.palette.secondary.main})`,
+                        boxShadow: `0 6px 16px ${alpha(theme.palette.secondary.main, 0.4)}`
+                      }
+                    }}
+                  >
+                    Nuevo Test
+                  </Button>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </Fade>
+
+        {/* Alerts Section */}
+        <Box sx={{ mb: 3 }}>
+          {success && (
+            <Slide direction="down" in={Boolean(success)} timeout={300}>
+              <Alert 
+                severity="success" 
+                sx={{ 
+                  mb: 2,
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(theme.palette.success.main, 0.2)}`
+                }}
+              >
+                {success}
+              </Alert>
+            </Slide>
+          )}
+
+          {error && (
+            <Slide direction="down" in={Boolean(error)} timeout={300}>
+              <Alert 
+                severity="error" 
+                sx={{ 
+                  borderRadius: 2,
+                  border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`
+                }}
+              >
+                {error}
+              </Alert>
+            </Slide>
+          )}
+        </Box>
+
+        {/* Stats Section */}
+        <Fade in timeout={800}>
+          <Card
+            elevation={0}
+            sx={{
+              mb: 4,
+              background: 'rgba(255, 255, 255, 0.7)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+              borderRadius: 3
+            }}
+          >
+            <CardContent sx={{ p: 3 }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between">
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Science sx={{ color: theme.palette.primary.main, fontSize: 28 }} />
+                  <Box>
+                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                      Tests Registrados
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Total de evaluaciones en el sistema
+                    </Typography>
+                  </Box>
+                </Box>
+                <Chip
+                  label={tests.length}
+                  sx={{
+                    background: `linear-gradient(135deg, 
+                      ${theme.palette.primary.main}, 
+                      ${theme.palette.primary.dark})`,
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '1.1rem',
+                    height: 40,
+                    minWidth: 60
+                  }}
+                />
+              </Box>
+            </CardContent>
+          </Card>
+        </Fade>
+
+        {/* Tests Grid */}
+        <Fade in timeout={1000}>
+          <Box>
+            {tests.length === 0 ? (
+              <Card
+                elevation={0}
+                sx={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  border: `1px solid ${alpha(theme.palette.divider, 0.1)}`,
+                  borderRadius: 3,
+                  py: 8
+                }}
+              >
+                <Box textAlign="center">
+                  <AssessmentIcon 
+                    sx={{ 
+                      fontSize: 64, 
+                      color: alpha(theme.palette.text.secondary, 0.3),
+                      mb: 2 
+                    }} 
+                  />
+                  <Typography 
+                    variant="h6" 
+                    color="text.secondary" 
+                    sx={{ mb: 1, fontWeight: 500 }}
+                  >
+                    No hay tests registrados
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Comienza creando el primer test en el sistema
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<PostAdd />}
+                    onClick={handleCreateTest}
+                    sx={{
+                      mt: 3,
+                      borderRadius: 2,
+                      textTransform: 'none',
+                      fontWeight: 600,
+                      background: `linear-gradient(135deg, 
+                        ${theme.palette.secondary.main}, 
+                        ${theme.palette.secondary.dark})`
+                    }}
+                  >
+                    Crear Primer Test
+                  </Button>
+                </Box>
+              </Card>
+            ) : (
+              <Grid container spacing={3}>
+                {tests.map((test, index) => (
+                  <Grid 
+                    size={{ xs: 12, sm: 6, md: 4 }} key={test.testId}
+                  >
+                    <Fade in timeout={600 + index * 100}>
+                      <Box>
+                        <TestCard 
+                          currentDoctorEmail={authService.getCurrentUserEmail()}
+                          test={test} 
+                          onDelete={handleDeleteTest} 
+                          onDataDelete={handleDataDelete}
+                        />
+                      </Box>
+                    </Fade>
+                  </Grid>
+                ))}
+              </Grid>
+            )}
+          </Box>
+        </Fade>
+
+        {tests.length > 0 && (
+          <Fab
+            color="secondary"
+            aria-label="add"
+            onClick={handleCreateTest}
+            sx={{
+              position: 'fixed',
+              bottom: 24,
+              right: 24,
+              background: `linear-gradient(135deg, 
+                ${theme.palette.secondary.main}, 
+                ${theme.palette.secondary.dark})`,
+              boxShadow: `0 8px 24px ${alpha(theme.palette.secondary.main, 0.4)}`,
+              '&:hover': {
+                background: `linear-gradient(135deg, 
+                  ${theme.palette.secondary.dark}, 
+                  ${theme.palette.secondary.main})`,
+                boxShadow: `0 12px 32px ${alpha(theme.palette.secondary.main, 0.5)}`,
+                transform: 'scale(1.05)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <AddIcon />
+          </Fab>
+        )}
+      </Container>
+    </Box>
+  );
+};
+
+export default TestScreen;
